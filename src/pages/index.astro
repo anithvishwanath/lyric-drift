@@ -54,7 +54,7 @@ const discographies = {
 
   html, body { height: 100%; background: var(--color-bg); color: var(--color-text); font-family: var(--font-sans); font-size: 16px; line-height: 1.6; }
 
-  input, button {
+  input, button, select {
     font-family: var(--font-sans); font-size: 0.88rem;
     color: var(--color-text); background: var(--color-bg);
     border: 0.5px solid var(--color-border-strong);
@@ -62,6 +62,16 @@ const discographies = {
     outline: none; transition: border-color 0.15s;
   }
   input:focus { border-color: var(--color-text-secondary); }
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888780' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.85rem center;
+    padding-right: 2.2rem;
+  }
+  select:focus { border-color: var(--color-text-secondary); }
   button { cursor: pointer; background: transparent; padding: 0.6rem 1.1rem; }
   button:hover { background: var(--color-surface); }
   button:active { transform: scale(0.98); }
@@ -118,7 +128,7 @@ const discographies = {
     <div id="error-box" class="error-box"></div>
     <div style="margin-bottom:1.4rem;">
       <label class="field-label" for="artist-input">Artist</label>
-      <select id="artist-input" style="width:100%;appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22><path fill=%22%23888780%22 d=%22M1 1l5 5 5-5%22 stroke=%22%23888780%22 stroke-width=%221.5%22 fill=%22none%22/></svg>');background-repeat:no-repeat;background-position:right 0.85rem center;padding-right:2.2rem;cursor:pointer;">
+      <select id="artist-input" style="width:100%;">
         <option value="Kendrick Lamar">Kendrick Lamar</option>
         <option value="The Beatles">The Beatles</option>
         <option value="Linkin Park">Linkin Park</option>
@@ -204,7 +214,7 @@ const discographies = {
 const DISCOGRAPHIES = {"Kendrick Lamar": [{"name": "Section.80", "year": 2011, "tracks": ["Fuck Your Ethnicity", "Hol' Up", "A.D.H.D", "No Joke", "Chapter Six", "Rigamortis", "Institutionalized", "Chapter Ten", "Ronald Reagan Era", "Poe Man's Dreams", "Blow My High", "Alien Girl", "No Makeup", "Keisha's Song", "HiiiPoWeR"]}, {"name": "good kid, m.A.A.d city", "year": 2012, "tracks": ["Sherane a.k.a Master Splinter's Daughter", "Bitch, Don't Kill My Vibe", "Backseat Freestyle", "The Art of Peer Pressure", "Money Trees", "Poetic Justice", "Good Kid", "m.A.A.d city", "Swimming Pools (Drank)", "Sing About Me, I'm Dying of Thirst", "Real", "Compton"]}, {"name": "To Pimp a Butterfly", "year": 2015, "tracks": ["Wesley's Theory", "For Free?", "King Kunta", "Institutionalized", "These Walls", "u", "Alright", "For Sale?", "Momma", "Hood Politics", "How Much a Dollar Cost", "Complexion", "The Blacker the Berry", "You Ain't Gotta Lie", "i", "Mortal Man"]}, {"name": "untitled unmastered.", "year": 2016, "tracks": ["untitled 01", "untitled 02", "untitled 03", "untitled 04", "untitled 05", "untitled 06", "untitled 07", "untitled 08"]}, {"name": "DAMN.", "year": 2017, "tracks": ["BLOOD.", "DNA.", "YAH.", "ELEMENT.", "FEEL.", "LOYALTY.", "PRIDE.", "HUMBLE.", "LUST.", "LOVE.", "XXX.", "FEAR.", "GOD.", "DUCKWORTH."]}, {"name": "Mr. Morale & The Big Steppers", "year": 2022, "tracks": ["United in Grief", "N95", "Worldwide Steppers", "Die Hard", "Father Time", "Rich (Interlude)", "Rich Spirit", "We Cry Together", "Purple Hearts", "Count Me Out", "Crown", "Silent Hill", "Savior (Interlude)", "Savior", "Auntie Diaries", "Mr. Morale", "Mother I Sober", "Mirror"]}, {"name": "GNX", "year": 2024, "tracks": ["wacced out murals", "squabble up", "luther", "man at the garden", "hey now", "reincarnated", "tv off", "dodger blue", "peekaboo", "heart pt. 6", "gloria", "gnx"]}], "The Beatles": [{"name": "Please Please Me", "year": 1963, "tracks": ["I Saw Her Standing There", "Misery", "Anna (Go to Him)", "Chains", "Boys", "Ask Me Why", "Please Please Me", "Love Me Do", "P.S. I Love You", "Baby It's You", "Do You Want to Know a Secret", "A Taste of Honey", "There's a Place", "Twist and Shout"]}, {"name": "With the Beatles", "year": 1963, "tracks": ["It Won't Be Long", "All I've Got to Do", "All My Loving", "Don't Bother Me", "Little Child", "Till There Was You", "Please Mister Postman", "Roll Over Beethoven", "Hold Me Tight", "You Really Got a Hold on Me", "I Wanna Be Your Man", "Devil in Her Heart", "Not a Second Time", "Money (That's What I Want)"]}, {"name": "A Hard Day's Night", "year": 1964, "tracks": ["A Hard Day's Night", "I Should Have Known Better", "If I Fell", "I'm Happy Just to Dance with You", "And I Love Her", "Tell Me Why", "Can't Buy Me Love", "Any Time at All", "I'll Cry Instead", "Things We Said Today", "When I Get Home", "You Can't Do That", "I'll Be Back"]}, {"name": "Beatles for Sale", "year": 1964, "tracks": ["No Reply", "I'm a Loser", "Baby's in Black", "Rock and Roll Music", "I'll Follow the Sun", "Mr. Moonlight", "Kansas City", "Eight Days a Week", "Words of Love", "Honey Don't", "Every Little Thing", "I Don't Want to Spoil the Party", "What You're Doing", "Everybody's Trying to Be My Baby"]}, {"name": "Help!", "year": 1965, "tracks": ["Help!", "The Night Before", "You've Got to Hide Your Love Away", "I Need You", "Another Girl", "You're Going to Lose That Girl", "Ticket to Ride", "Act Naturally", "It's Only Love", "You Like Me Too Much", "Tell Me What You See", "I've Just Seen a Face", "Yesterday", "Dizzy Miss Lizzy"]}, {"name": "Rubber Soul", "year": 1965, "tracks": ["Drive My Car", "Norwegian Wood (This Bird Has Flown)", "You Won't See Me", "Nowhere Man", "Think for Yourself", "The Word", "Michelle", "What Goes On", "Girl", "I'm Looking Through You", "In My Life", "Wait", "If I Needed Someone", "Run for Your Life"]}, {"name": "Revolver", "year": 1966, "tracks": ["Taxman", "Eleanor Rigby", "I'm Only Sleeping", "Love You To", "Here, There and Everywhere", "Yellow Submarine", "She Said She Said", "Good Day Sunshine", "And Your Bird Can Sing", "For No One", "Doctor Robert", "I Want to Tell You", "Got to Get You into My Life", "Tomorrow Never Knows"]}, {"name": "Sgt. Pepper's Lonely Hearts Club Band", "year": 1967, "tracks": ["Sgt. Pepper's Lonely Hearts Club Band", "With a Little Help from My Friends", "Lucy in the Sky with Diamonds", "Getting Better", "Fixing a Hole", "She's Leaving Home", "Being for the Benefit of Mr. Kite!", "Within You Without You", "When I'm Sixty-Four", "Lovely Rita", "Good Morning Good Morning", "Sgt. Pepper's Lonely Hearts Club Band (Reprise)", "A Day in the Life"]}, {"name": "Magical Mystery Tour", "year": 1967, "tracks": ["Magical Mystery Tour", "The Fool on the Hill", "Flying", "Blue Jay Way", "Your Mother Should Know", "I Am the Walrus", "Hello, Goodbye", "Strawberry Fields Forever", "Penny Lane", "Baby, You're a Rich Man", "All You Need Is Love"]}, {"name": "The Beatles (White Album)", "year": 1968, "tracks": ["Back in the U.S.S.R.", "Dear Prudence", "Glass Onion", "Ob-La-Di, Ob-La-Da", "Wild Honey Pie", "The Continuing Story of Bungalow Bill", "While My Guitar Gently Weeps", "Happiness Is a Warm Gun", "Martha My Dear", "I'm So Tired", "Blackbird", "Piggies", "Rocky Raccoon", "Don't Pass Me By", "Why Don't We Do It in the Road?", "I Will", "Julia", "Birthday", "Yer Blues", "Mother Nature's Son", "Everybody's Got Something to Hide Except Me and My Monkey", "Sexy Sadie", "Helter Skelter", "Long, Long, Long", "Revolution 1", "Honey Pie", "Savoy Truffle", "Cry Baby Cry", "Revolution 9", "Good Night"]}, {"name": "Yellow Submarine", "year": 1969, "tracks": ["Yellow Submarine", "Only a Northern Song", "All Together Now", "Hey Bulldog", "It's All Too Much", "All You Need Is Love"]}, {"name": "Abbey Road", "year": 1969, "tracks": ["Come Together", "Something", "Maxwell's Silver Hammer", "Oh! Darling", "Octopus's Garden", "I Want You (She's So Heavy)", "Here Comes the Sun", "Because", "You Never Give Me Your Money", "Sun King", "Mean Mr. Mustard", "Polythene Pam", "She Came In Through the Bathroom Window", "Golden Slumbers", "Carry That Weight", "The End", "Her Majesty"]}, {"name": "Let It Be", "year": 1970, "tracks": ["Two of Us", "Dig a Pony", "Across the Universe", "I Me Mine", "Dig It", "Let It Be", "Maggie Mae", "I've Got a Feeling", "One After 909", "The Long and Winding Road", "For You Blue", "Get Back"]}], "Linkin Park": [{"name": "Hybrid Theory", "year": 2000, "tracks": ["Papercut", "One Step Closer", "With You", "Points of Authority", "Crawling", "Runaway", "By Myself", "In the End", "A Place for My Head", "Forgotten", "Cure for the Itch", "Pushing Me Away"]}, {"name": "Meteora", "year": 2003, "tracks": ["Foreword", "Don't Stay", "Somewhere I Belong", "Lying from You", "Hit the Floor", "Easier to Run", "Faint", "Figure.09", "Breaking the Habit", "From the Inside", "Nobody's Listening", "Session", "Numb"]}, {"name": "Minutes to Midnight", "year": 2007, "tracks": ["Wake", "Given Up", "Leave Out All the Rest", "Bleed It Out", "Shadow of the Day", "What I've Done", "Hands Held High", "No More Sorrow", "Valentine's Day", "In Between", "In Pieces", "The Little Things Give You Away"]}, {"name": "A Thousand Suns", "year": 2010, "tracks": ["The Requiem", "The Radiance", "Burning in the Skies", "Empty Spaces", "When They Come for Me", "Robot Boy", "Jornada del Muerto", "Waiting for the End", "Blackout", "Wretches and Kings", "Wisdom, Justice, and Love", "Iridescent", "Fallout", "The Catalyst", "The Messenger"]}, {"name": "Living Things", "year": 2012, "tracks": ["Lost in the Echo", "In My Remains", "Burn It Down", "Lies Greed Misery", "I'll Be Gone", "Castle of Glass", "Victimized", "Roads Untraveled", "Tinfoil", "Powerless"]}, {"name": "The Hunting Party", "year": 2014, "tracks": ["Keys to the Kingdom", "All for Nothing", "Guilty All the Same", "The Summoning", "War", "Wastelands", "Until It's Gone", "Rebellion", "Mark the Graves", "Drawbar", "Final Masquerade", "A Line in the Sand"]}, {"name": "One More Light", "year": 2017, "tracks": ["Nobody Can Save Me", "Good Goodbye", "Talking to Myself", "Battle Symphony", "Invisible", "Heavy", "Sorry for Now", "Halfway Right", "One More Light", "Sharp Edges"]}, {"name": "From Zero", "year": 2024, "tracks": ["From Zero (Intro)", "The Emptiness Machine", "Cut the Bridge", "Heavy Is the Crown", "Over Each Other", "Casualty", "Overflow", "Two Faced", "Stained", "Good Things Go", "IGYEIH", "Against It All", "Lifeline"]}]};
 const COLORS = ["#7F77DD","#1D9E75","#D85A30","#D4537E","#378ADD","#BA7517","#E24B4A","#639922"];
 const SKIP_ALBUM = /\b(live|concert|tour|session|unplugged|acoustic|festival|mixtape|compilation|greatest hits|best of|collection|anthology|remix|remixes|\bep\b|single|instrumental|karaoke|tribute|cover|deluxe)\b/i;
-const S = { artistName: "", albums: [], trackedWords: [], chart: null };
+const S = { artistName: "", albums: [], trackedWords: [], chart: null, shouldStop: false };
 
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach(el => el.classList.remove("active"));
@@ -230,7 +240,7 @@ function countWord(text, word) {
 async function handleSearch() {
   const query = document.getElementById("artist-input").value.trim();
   if (!query) { showError("Please select an artist."); return; }
-  showError(""); S.albums = []; S.artistName = query;
+  showError(""); S.albums = []; S.artistName = query; S.shouldStop = false;
   showScreen("loading");
   document.getElementById("loading-name").textContent = query;
   document.getElementById("loading-initials").textContent = query[0];
@@ -245,8 +255,10 @@ async function handleSearch() {
     let done = 0;
 
     for (const album of discography) {
+      if (S.shouldStop) break;
       const albumSongs = [];
       for (const trackName of album.tracks) {
+        if (S.shouldStop) break;
         setProgress(done, totalTracks, trackName);
         try {
           const res = await fetch(
@@ -280,7 +292,7 @@ async function handleSearch() {
   }
 }
 
-function stopFetch() { /* no-op — lrclib loads instantly */ }
+function stopFetch() { S.shouldStop = true; }
 
 function initAnalyze() {
   const totalSongs = S.albums.reduce((s, a) => s + a.songs.length, 0);
