@@ -302,27 +302,7 @@ function initAnalyze() {
   if (S.trackedWords.length) updateChart();
 }
 
-function getTopWords(n) {
-    const STOP = new Set([
-      "the","a","an","and","or","but","in","on","at","to","for","of","with",
-      "is","it","its","i","my","me","we","you","your","he","she","they","them",
-      "that","this","was","are","be","been","have","has","had","do","did","will",
-      "can","so","if","as","up","out","not","no","all","just","like","what",
-      "when","who","how","more","about","from","get","got","go","i'm","don't",
-      "know","one","see","cause","yeah","oh","ah","ay","uh","na","da","gonna",
-      "gotta","wanna","tryna","til","em","let","make","made","come","came",
-      "said","say","tell","told","went","want","need","back","now","then",
-      "there","here","some","than","into","over","after","its","its","our",
-      "their","been","still","even","never","always","every","us","him","her",
-      "by","was","were","would","could","should","must","may","might","i'll",
-      "i'd","i've","that's","it's","dont","can't","wont","ain't","bout","cause",
-      "cuz","nigga","niggas","shit","fuck","ass","bitch", "man","way","day", "put",
-      "take","took","right","down","around","same","through","between","while",
-      "these","those","much","too","very","own","off","again","where","both",
-      "few","more","most","other","into","only","also","new","first","last",
-      "long","great","little","own","right","big","high","different","small",
-      "large","next","early","young","important","public","private", "ooh", "hey",
-    ]);
+
 
   // Count every word across all albums
   const freq = {};
@@ -342,7 +322,6 @@ function getTopWords(n) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, n)
     .map(([w]) => w);
-}
 
 function resetApp() {
   S.albums = []; S.artistName = ""; S.trackedWords = [];
