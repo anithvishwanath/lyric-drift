@@ -5,4 +5,4 @@ dist/
 .astro/
  
 # Local Netlify folder
-.netlify
+.netlify    
