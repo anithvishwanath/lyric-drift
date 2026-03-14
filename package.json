@@ -8,6 +8,7 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "astro": "^4.0.0"
+    "@astrojs/netlify": "^7.0.2",
+    "astro": "^6.0.4"
   }
 }

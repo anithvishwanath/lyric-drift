@@ -1,886 +1,475 @@
 ---
 // Lyric Drift — src/pages/index.astro
 ---
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lyric Drift — Word Frequency Tracker</title>
-    <style>
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lyric Drift — Word Frequency Tracker</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      :root {
-        --font-serif: Georgia, "Times New Roman", serif;
-        --font-mono: "JetBrains Mono", "Fira Mono", "Courier New", monospace;
-        --font-sans: system-ui, -apple-system, sans-serif;
-        --color-bg: #faf9f7;
-        --color-surface: #f2f0eb;
-        --color-text: #1a1917;
-        --color-text-secondary: #5f5e5a;
-        --color-text-tertiary: #888780;
-        --color-border: rgba(0, 0, 0, 0.1);
-        --color-border-strong: rgba(0, 0, 0, 0.18);
-        --color-danger-bg: #fcebeb;
-        --color-danger-border: #f09595;
-        --color-danger-text: #a32d2d;
-        --radius-md: 8px;
-        --radius-lg: 12px;
-      }
+  :root {
+    --font-serif: Georgia, 'Times New Roman', serif;
+    --font-mono: 'JetBrains Mono', 'Fira Mono', 'Courier New', monospace;
+    --font-sans: system-ui, -apple-system, sans-serif;
+    --color-bg: #faf9f7;
+    --color-surface: #f2f0eb;
+    --color-text: #1a1917;
+    --color-text-secondary: #5f5e5a;
+    --color-text-tertiary: #888780;
+    --color-border: rgba(0,0,0,0.10);
+    --color-border-strong: rgba(0,0,0,0.18);
+    --color-danger-bg: #fcebeb;
+    --color-danger-border: #f09595;
+    --color-danger-text: #a32d2d;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+  }
 
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --color-bg: #181715;
-          --color-surface: #222119;
-          --color-text: #edeae3;
-          --color-text-secondary: #b4b2a9;
-          --color-text-tertiary: #6e6d67;
-          --color-border: rgba(255, 255, 255, 0.09);
-          --color-border-strong: rgba(255, 255, 255, 0.16);
-          --color-danger-bg: #2e1a1a;
-          --color-danger-border: #791f1f;
-          --color-danger-text: #f09595;
-        }
-      }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-bg: #181715;
+      --color-surface: #222119;
+      --color-text: #edeae3;
+      --color-text-secondary: #b4b2a9;
+      --color-text-tertiary: #6e6d67;
+      --color-border: rgba(255,255,255,0.09);
+      --color-border-strong: rgba(255,255,255,0.16);
+      --color-danger-bg: #2e1a1a;
+      --color-danger-border: #791f1f;
+      --color-danger-text: #f09595;
+    }
+  }
 
-      html,
-      body {
-        height: 100%;
-        background: var(--color-bg);
-        color: var(--color-text);
-        font-family: var(--font-sans);
-        font-size: 16px;
-        line-height: 1.6;
-      }
+  html, body { height: 100%; background: var(--color-bg); color: var(--color-text); font-family: var(--font-sans); font-size: 16px; line-height: 1.6; }
 
-      input,
-      button {
-        font-family: var(--font-sans);
-        font-size: 0.88rem;
-        color: var(--color-text);
-        background: var(--color-bg);
-        border: 0.5px solid var(--color-border-strong);
-        border-radius: var(--radius-md);
-        padding: 0.6rem 0.85rem;
-        outline: none;
-        transition: border-color 0.15s;
-      }
-      input:focus {
-        border-color: var(--color-text-secondary);
-      }
-      button {
-        cursor: pointer;
-        background: transparent;
-        padding: 0.6rem 1.1rem;
-      }
-      button:hover {
-        background: var(--color-surface);
-      }
-      button:active {
-        transform: scale(0.98);
-      }
-      a {
-        color: var(--color-text-secondary);
-      }
+  input, button {
+    font-family: var(--font-sans); font-size: 0.88rem;
+    color: var(--color-text); background: var(--color-bg);
+    border: 0.5px solid var(--color-border-strong);
+    border-radius: var(--radius-md); padding: 0.6rem 0.85rem;
+    outline: none; transition: border-color 0.15s;
+  }
+  input:focus { border-color: var(--color-text-secondary); }
+  button { cursor: pointer; background: transparent; padding: 0.6rem 1.1rem; }
+  button:hover { background: var(--color-surface); }
+  button:active { transform: scale(0.98); }
+  a { color: var(--color-text-secondary); }
 
-      .screen {
-        display: none;
-      }
-      .screen.active {
-        display: block;
-      }
+  .screen { display: none; }
+  .screen.active { display: block; }
 
-      #setup-wrap {
-        max-width: 440px;
-        margin: 0 auto;
-        padding: 4rem 1.5rem;
-      }
+  #setup-wrap { max-width: 440px; margin: 0 auto; padding: 4rem 1.5rem; }
+  .eyebrow { font-family: var(--font-mono); font-size: 0.58rem; color: var(--color-text-tertiary); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .app-title { font-family: var(--font-serif); font-size: 3rem; font-weight: 500; line-height: 1.05; margin-bottom: 0.35rem; }
+  .field-label { display: block; font-family: var(--font-mono); font-size: 0.6rem; color: var(--color-text-tertiary); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
+  .error-box { padding: 0.65rem 0.9rem; background: var(--color-danger-bg); border: 0.5px solid var(--color-danger-border); border-radius: var(--radius-md); color: var(--color-danger-text); font-size: 0.82rem; margin-bottom: 0.9rem; display: none; }
 
-      .eyebrow {
-        font-family: var(--font-mono);
-        font-size: 0.58rem;
-        color: var(--color-text-tertiary);
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        margin-bottom: 0.5rem;
-      }
-      .app-title {
-        font-family: var(--font-serif);
-        font-size: 3rem;
-        font-weight: 500;
-        line-height: 1.05;
-        margin-bottom: 0.35rem;
-      }
-      .field-label {
-        display: block;
-        font-family: var(--font-mono);
-        font-size: 0.6rem;
-        color: var(--color-text-tertiary);
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        margin-bottom: 0.4rem;
-      }
-      .error-box {
-        padding: 0.65rem 0.9rem;
-        background: var(--color-danger-bg);
-        border: 0.5px solid var(--color-danger-border);
-        border-radius: var(--radius-md);
-        color: var(--color-danger-text);
-        font-size: 0.82rem;
-        margin-bottom: 0.9rem;
-        display: none;
-      }
+  #loading-wrap { max-width: 380px; margin: 0 auto; padding: 5rem 1.5rem; text-align: center; }
+  .prog-track { height: 2px; background: var(--color-border); border-radius: 1px; margin: 0.75rem 0 0.3rem; overflow: hidden; }
+  .prog-fill { height: 100%; background: var(--color-text); border-radius: 1px; transition: width 0.3s ease; width: 0%; }
 
-      #loading-wrap {
-        max-width: 380px;
-        margin: 0 auto;
-        padding: 5rem 1.5rem;
-        text-align: center;
-      }
-      .prog-track {
-        height: 2px;
-        background: var(--color-border);
-        border-radius: 1px;
-        margin: 0.75rem 0 0.3rem;
-        overflow: hidden;
-      }
-      .prog-fill {
-        height: 100%;
-        background: var(--color-text);
-        border-radius: 1px;
-        transition: width 0.3s ease;
-        width: 0%;
-      }
+  #screen-analyze { display: flex; flex-direction: column; min-height: 100vh; }
+  #analyze-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.8rem 1.5rem; border-bottom: 0.5px solid var(--color-border);
+    flex-wrap: wrap; gap: 0.6rem;
+    background: var(--color-bg); position: sticky; top: 0; z-index: 10;
+  }
+  #analyze-body { display: flex; flex: 1; min-height: 520px; }
+  #word-sidebar { width: 220px; flex-shrink: 0; border-right: 0.5px solid var(--color-border); padding: 1.1rem; display: flex; flex-direction: column; gap: 0.9rem; }
+  #chart-main { flex: 1; min-width: 0; padding: 1.25rem 1.5rem; display: flex; flex-direction: column; }
 
-      #screen-analyze {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-      }
-      #analyze-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.8rem 1.5rem;
-        border-bottom: 0.5px solid var(--color-border);
-        flex-wrap: wrap;
-        gap: 0.6rem;
-        background: var(--color-bg);
-        position: sticky;
-        top: 0;
-        z-index: 10;
-      }
-      #analyze-body {
-        display: flex;
-        flex: 1;
-        min-height: 520px;
-      }
-      #word-sidebar {
-        width: 220px;
-        flex-shrink: 0;
-        border-right: 0.5px solid var(--color-border);
-        padding: 1.1rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.9rem;
-      }
-      #chart-main {
-        flex: 1;
-        min-width: 0;
-        padding: 1.25rem 1.5rem;
-        display: flex;
-        flex-direction: column;
-      }
+  .stat-group { text-align: right; }
+  .stat-label { font-family: var(--font-mono); font-size: 0.55rem; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.1em; }
+  .stat-value { font-family: var(--font-serif); font-size: 1.2rem; font-weight: 500; }
 
-      .stat-group {
-        text-align: right;
-      }
-      .stat-label {
-        font-family: var(--font-mono);
-        font-size: 0.55rem;
-        color: var(--color-text-tertiary);
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-      }
-      .stat-value {
-        font-family: var(--font-serif);
-        font-size: 1.2rem;
-        font-weight: 500;
-      }
+  .word-chip { display: flex; align-items: center; padding: 0.42rem 0.65rem; background: var(--color-surface); border: 0.5px solid var(--color-border); border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 0.78rem; margin-bottom: 0.3rem; }
+  .chip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-right: 0.5rem; }
+  .chip-remove { background: none; border: none; cursor: pointer; color: var(--color-text-tertiary); font-size: 1rem; line-height: 1; margin-left: auto; padding: 0 0 0 0.4rem; }
+  .chip-remove:hover { color: var(--color-text); background: none; }
 
-      .word-chip {
-        display: flex;
-        align-items: center;
-        padding: 0.42rem 0.65rem;
-        background: var(--color-surface);
-        border: 0.5px solid var(--color-border);
-        border-radius: var(--radius-md);
-        font-family: var(--font-mono);
-        font-size: 0.78rem;
-        margin-bottom: 0.3rem;
-      }
-      .chip-dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        flex-shrink: 0;
-        margin-right: 0.5rem;
-      }
-      .chip-remove {
-        background: none;
-        border: none;
-        cursor: pointer;
-        color: var(--color-text-tertiary);
-        font-size: 1rem;
-        line-height: 1;
-        margin-left: auto;
-        padding: 0 0 0 0.4rem;
-      }
-      .chip-remove:hover {
-        color: var(--color-text);
-        background: none;
-      }
+  .chart-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--color-text-tertiary); font-size: 0.88rem; gap: 0.4rem; }
+  .unit-note { font-family: var(--font-mono); font-size: 0.58rem; color: var(--color-text-tertiary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .tip-box { padding: 0.7rem; background: var(--color-surface); border-radius: var(--radius-md); font-size: 0.7rem; color: var(--color-text-tertiary); line-height: 1.5; }
+</style>
+</head>
+<body>
 
-      .chart-empty {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        color: var(--color-text-tertiary);
-        font-size: 0.88rem;
-        gap: 0.4rem;
-      }
-      .unit-note {
-        font-family: var(--font-mono);
-        font-size: 0.58rem;
-        color: var(--color-text-tertiary);
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        margin-bottom: 0.5rem;
-      }
-      .tip-box {
-        padding: 0.7rem;
-        background: var(--color-surface);
-        border-radius: var(--radius-md);
-        font-size: 0.7rem;
-        color: var(--color-text-tertiary);
-        line-height: 1.5;
-      }
-    </style>
-  </head>
-  <body>
-    <!-- Setup -->
-    <div id="screen-setup" class="screen active">
-      <div id="setup-wrap">
-        <div class="eyebrow">Word frequency tracker</div>
-        <h1 class="app-title">Lyric<br /><em>Drift</em></h1>
-        <p
-          style="font-size:0.82rem;color:var(--color-text-tertiary);margin-bottom:2.2rem;line-height:1.5;"
-        >
-          Track how often words appear across a band's discography — album by
-          album.
-        </p>
-        <div id="error-box" class="error-box"></div>
-        <div style="margin-bottom:1rem;">
-          <label class="field-label" for="api-key-input">Genius API Key</label>
-          <div style="position:relative;">
-            <input
-              type="password"
-              id="api-key-input"
-              placeholder="Paste your Client Access Token"
-              style="width:100%;padding-right:3.5rem;"
-            />
-            <button
-              id="toggle-btn"
-              onclick="toggleKey()"
-              style="position:absolute;right:0.6rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:0.7rem;font-family:var(--font-mono);color:var(--color-text-tertiary);padding:0.2rem;"
-              >show</button
-            >
-          </div>
-          <p
-            style="font-size:0.7rem;color:var(--color-text-tertiary);margin-top:0.3rem;"
-          >
-            Free at <a
-              href="https://genius.com/api-clients"
-              target="_blank"
-              rel="noopener">genius.com/api-clients</a
-            > — use "Client Access Token"
-          </p>
+<!-- Setup -->
+<div id="screen-setup" class="screen active">
+  <div id="setup-wrap">
+    <div class="eyebrow">Word frequency tracker</div>
+    <h1 class="app-title">Lyric<br><em>Drift</em></h1>
+    <p style="font-size:0.82rem;color:var(--color-text-tertiary);margin-bottom:2.2rem;line-height:1.5;">
+      Track how often words appear across a band's studio albums — album by album.
+    </p>
+    <div id="error-box" class="error-box"></div>
+    <div style="margin-bottom:1.4rem;">
+      <label class="field-label" for="artist-input">Artist</label>
+      <input type="text" id="artist-input" placeholder="e.g. Radiohead, Phoebe Bridgers, Kendrick…" style="width:100%;" onkeydown="if(event.key==='Enter') handleSearch()" />
+    </div>
+    <button onclick="handleSearch()" style="width:100%;padding:0.85rem;">Begin Analysis →</button>
+    <div style="margin-top:1.8rem;display:flex;gap:1.2rem;font-family:var(--font-mono);font-size:0.58rem;color:var(--color-text-tertiary);">
+      <span>lyrics via genius.com</span><span>·</span><span>studio albums only</span><span>·</span><span>no data stored</span>
+    </div>
+  </div>
+</div>
+
+<!-- Loading -->
+<div id="screen-loading" class="screen">
+  <div id="loading-wrap">
+    <div id="loading-avatar" style="width:64px;height:64px;border-radius:50%;margin:0 auto 1.1rem;background:var(--color-surface);border:0.5px solid var(--color-border);overflow:hidden;display:flex;align-items:center;justify-content:center;">
+      <img id="loading-img" style="width:100%;height:100%;object-fit:cover;display:none;" />
+      <span id="loading-initials" style="font-family:var(--font-serif);font-size:1.4rem;color:var(--color-text-tertiary);"></span>
+    </div>
+    <h2 id="loading-name" style="font-family:var(--font-serif);font-size:1.6rem;font-weight:500;margin-bottom:0.3rem;"></h2>
+    <p id="loading-status" style="font-size:0.82rem;color:var(--color-text-secondary);margin-bottom:1.25rem;">Searching…</p>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:2rem;">
+      <span id="prog-song" style="font-size:0.68rem;color:var(--color-text-tertiary);font-family:var(--font-mono);max-width:72%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      <span id="prog-pct" style="font-size:0.68rem;color:var(--color-text-tertiary);font-family:var(--font-mono);">0%</span>
+    </div>
+    <button onclick="stopFetch()" style="padding:0.55rem 1.25rem;font-size:0.8rem;">Stop &amp; Analyze Now</button>
+    <p style="margin-top:0.75rem;font-size:0.7rem;color:var(--color-text-tertiary);">Fetching lyrics for each song — hang tight</p>
+  </div>
+</div>
+
+<!-- Analyze -->
+<div id="screen-analyze" class="screen">
+  <div id="analyze-header">
+    <div style="display:flex;align-items:center;gap:0.65rem;">
+      <span style="font-family:var(--font-serif);font-size:1.05rem;font-weight:500;">Lyric<em>Drift</em></span>
+      <span style="color:var(--color-border-strong);">|</span>
+      <span id="hdr-artist" style="font-size:0.85rem;color:var(--color-text-secondary);"></span>
+    </div>
+    <div style="display:flex;align-items:center;gap:1.25rem;">
+      <div class="stat-group"><div class="stat-label">Albums</div><div class="stat-value" id="stat-albums">—</div></div>
+      <div class="stat-group"><div class="stat-label">Songs</div><div class="stat-value" id="stat-songs">—</div></div>
+      <div class="stat-group"><div class="stat-label">Words</div><div class="stat-value" id="stat-words">—</div></div>
+      <button onclick="resetApp()" style="padding:0.38rem 0.8rem;font-size:0.75rem;">New Search</button>
+    </div>
+  </div>
+  <div id="analyze-body">
+    <div id="word-sidebar">
+      <div>
+        <div class="field-label" style="margin-bottom:0.5rem;">Track a word</div>
+        <div style="display:flex;gap:0.35rem;">
+          <input type="text" id="word-input" placeholder="e.g. love, fire…" style="flex:1;min-width:0;" onkeydown="if(event.key==='Enter') addWord()" />
+          <button onclick="addWord()" style="padding:0 0.7rem;font-size:1.1rem;flex-shrink:0;">+</button>
         </div>
-        <div style="margin-bottom:1.4rem;">
-          <label class="field-label" for="artist-input">Artist</label>
-          <input
-            type="text"
-            id="artist-input"
-            placeholder="e.g. Radiohead, Phoebe Bridgers, Kendrick…"
-            style="width:100%;"
-            onkeydown="if(event.key==='Enter') handleSearch()"
-          />
-        </div>
-        <button onclick="handleSearch()" style="width:100%;padding:0.85rem;"
-          >Begin Analysis →</button
-        >
-        <div
-          style="margin-top:1.8rem;display:flex;gap:1.2rem;font-family:var(--font-mono);font-size:0.58rem;color:var(--color-text-tertiary);"
-        >
-          <span>lyrics via genius.com</span><span>·</span><span
-            >runs locally</span
-          ><span>·</span><span>no data stored</span>
+      </div>
+      <div id="chip-list"></div>
+      <div id="empty-hint" style="padding:0.9rem;border:0.5px dashed var(--color-border-strong);border-radius:var(--radius-md);font-size:0.75rem;color:var(--color-text-tertiary);text-align:center;line-height:1.5;">
+        Add words above to see how they drift across albums
+      </div>
+      <div style="margin-top:auto;">
+        <div class="tip-box">
+          <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.25rem;">Y-axis unit</div>
+          Occurrences per 1,000 words — normalizes for album length.
         </div>
       </div>
     </div>
-
-    <!-- Loading -->
-    <div id="screen-loading" class="screen">
-      <div id="loading-wrap">
-        <div
-          id="loading-avatar"
-          style="width:64px;height:64px;border-radius:50%;margin:0 auto 1.1rem;background:var(--color-surface);border:0.5px solid var(--color-border);overflow:hidden;display:flex;align-items:center;justify-content:center;"
-        >
-          <img
-            id="loading-img"
-            style="width:100%;height:100%;object-fit:cover;display:none;"
-          />
-          <span
-            id="loading-initials"
-            style="font-family:var(--font-serif);font-size:1.4rem;color:var(--color-text-tertiary);"
-          ></span>
-        </div>
-        <h2
-          id="loading-name"
-          style="font-family:var(--font-serif);font-size:1.6rem;font-weight:500;margin-bottom:0.3rem;"
-        >
-        </h2>
-        <p
-          id="loading-status"
-          style="font-size:0.82rem;color:var(--color-text-secondary);margin-bottom:1.25rem;"
-        >
-          Searching…
-        </p>
-        <div class="prog-track">
-          <div class="prog-fill" id="prog-fill"></div>
-        </div>
-        <div
-          style="display:flex;justify-content:space-between;margin-bottom:2rem;"
-        >
-          <span
-            id="prog-song"
-            style="font-size:0.68rem;color:var(--color-text-tertiary);font-family:var(--font-mono);max-width:72%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
-          ></span>
-          <span
-            id="prog-pct"
-            style="font-size:0.68rem;color:var(--color-text-tertiary);font-family:var(--font-mono);"
-            >0%</span
-          >
-        </div>
-        <button
-          onclick="stopFetch()"
-          style="padding:0.55rem 1.25rem;font-size:0.8rem;"
-          >Stop &amp; Analyze Now</button
-        >
-        <p
-          style="margin-top:0.75rem;font-size:0.7rem;color:var(--color-text-tertiary);"
-        >
-          Large discographies can take a few minutes
-        </p>
+    <div id="chart-main">
+      <div id="chart-empty" class="chart-empty">
+        <span style="font-family:var(--font-serif);font-size:2.2rem;color:var(--color-border-strong);">←</span>
+        <span>Add a word to start tracking</span>
+      </div>
+      <div id="chart-container" style="display:none;flex-direction:column;flex:1;">
+        <div class="unit-note">Word frequency · studio albums in release order · per 1,000 words</div>
+        <div id="chart-legend" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:0.75rem;font-size:12px;color:var(--color-text-secondary);"></div>
+        <div style="position:relative;width:100%;height:400px;"><canvas id="lyricsChart"></canvas></div>
       </div>
     </div>
+  </div>
+</div>
 
-    <!-- Analyze -->
-    <div id="screen-analyze" class="screen">
-      <div id="analyze-header">
-        <div style="display:flex;align-items:center;gap:0.65rem;">
-          <span
-            style="font-family:var(--font-serif);font-size:1.05rem;font-weight:500;"
-            >Lyric<em>Drift</em></span
-          >
-          <span style="color:var(--color-border-strong);">|</span>
-          <span
-            id="hdr-artist"
-            style="font-size:0.85rem;color:var(--color-text-secondary);"></span>
-        </div>
-        <div style="display:flex;align-items:center;gap:1.25rem;">
-          <div class="stat-group">
-            <div class="stat-label">Songs</div><div
-              class="stat-value"
-              id="stat-songs"
-            >
-              —
-            </div>
-          </div>
-          <div class="stat-group">
-            <div class="stat-label">Albums</div><div
-              class="stat-value"
-              id="stat-albums"
-            >
-              —
-            </div>
-          </div>
-          <div class="stat-group">
-            <div class="stat-label">Words</div><div
-              class="stat-value"
-              id="stat-words"
-            >
-              —
-            </div>
-          </div>
-          <button
-            onclick="resetApp()"
-            style="padding:0.38rem 0.8rem;font-size:0.75rem;">New Search</button
-          >
-        </div>
-      </div>
-      <div id="analyze-body">
-        <div id="word-sidebar">
-          <div>
-            <div class="field-label" style="margin-bottom:0.5rem;">
-              Track a word
-            </div>
-            <div style="display:flex;gap:0.35rem;">
-              <input
-                type="text"
-                id="word-input"
-                placeholder="e.g. love, fire…"
-                style="flex:1;min-width:0;"
-                onkeydown="if(event.key==='Enter') addWord()"
-              />
-              <button
-                onclick="addWord()"
-                style="padding:0 0.7rem;font-size:1.1rem;flex-shrink:0;"
-                >+</button
-              >
-            </div>
-          </div>
-          <div id="chip-list"></div>
-          <div
-            id="empty-hint"
-            style="padding:0.9rem;border:0.5px dashed var(--color-border-strong);border-radius:var(--radius-md);font-size:0.75rem;color:var(--color-text-tertiary);text-align:center;line-height:1.5;"
-          >
-            Add words above to see how they drift across albums
-          </div>
-          <div style="margin-top:auto;">
-            <div class="tip-box">
-              <div
-                style="font-family:var(--font-mono);font-size:0.55rem;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.25rem;"
-              >
-                Y-axis unit
-              </div>
-              Occurrences per 1,000 words — normalizes for album length.
-            </div>
-          </div>
-        </div>
-        <div id="chart-main">
-          <div id="chart-empty" class="chart-empty">
-            <span
-              style="font-family:var(--font-serif);font-size:2.2rem;color:var(--color-border-strong);"
-              >←</span
-            >
-            <span>Add a word to start tracking</span>
-          </div>
-          <div
-            id="chart-container"
-            style="display:none;flex-direction:column;flex:1;"
-          >
-            <div class="unit-note">
-              Word frequency across discography · per 1,000 words
-            </div>
-            <div
-              id="chart-legend"
-              style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:0.75rem;font-size:12px;color:var(--color-text-secondary);"
-            >
-            </div>
-            <div style="position:relative;width:100%;height:400px;">
-              <canvas id="lyricsChart"></canvas>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+<script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script is:inline>
+const COLORS = ["#7F77DD","#1D9E75","#D85A30","#D4537E","#378ADD","#BA7517","#E24B4A","#639922"];
+const SKIP_ALBUM = /\b(live|concert|tour|session|unplugged|acoustic|festival|mixtape|compilation|greatest hits|best of|collection|anthology|deluxe|remix|remixes|\bep\b|single|instrumental|karaoke|tribute|cover)\b/i;
+const S = { artist: null, albums: [], trackedWords: [], shouldStop: false, chart: null };
 
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"
-    ></script>
-    <script is:inline>
-      const COLORS = [
-        "#7F77DD",
-        "#1D9E75",
-        "#D85A30",
-        "#D4537E",
-        "#378ADD",
-        "#BA7517",
-        "#E24B4A",
-        "#639922",
-      ];
-      const S = {
-        apiKey: "",
-        artist: null,
-        songs: [],
-        trackedWords: [],
-        shouldStop: false,
-        chart: null,
-      };
+const CACHE_KEY = "lyricdrift_v1";
+function getCache() { try { return JSON.parse(localStorage.getItem(CACHE_KEY) || "{}"); } catch { return {}; } }
+function setCache(c) { try { localStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch {} }
 
-      async function geniusFetch(path) {
-        const sep = path.includes("?") ? "&" : "?";
-        const r = await fetch(
-          "/api/genius" +
-            path +
-            sep +
-            "access_token=" +
-            encodeURIComponent(S.apiKey),
-        );
-        if (!r.ok) throw new Error("HTTP " + r.status + " from Genius API");
-        return r.json();
-      }
+async function geniusFetch(path) {
+  const r = await fetch("/api/genius" + path);
+  if (!r.ok) throw new Error("HTTP " + r.status + " from Genius API");
+  return r.json();
+}
 
-      async function fetchPage(songUrl) {
-        const r = await fetch("/api/page?url=" + encodeURIComponent(songUrl));
-        if (!r.ok) throw new Error("HTTP " + r.status);
-        return r.text();
-      }
+async function fetchPage(songUrl) {
+  const r = await fetch("/api/page?url=" + encodeURIComponent(songUrl));
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  return r.text();
+}
 
-      function showScreen(id) {
-        document
-          .querySelectorAll(".screen")
-          .forEach((el) => el.classList.remove("active"));
-        document.getElementById("screen-" + id).classList.add("active");
-      }
-      function showError(msg) {
-        const el = document.getElementById("error-box");
-        el.textContent = msg;
-        el.style.display = msg ? "block" : "none";
-      }
-      function setProgress(cur, tot, songTitle) {
-        const pct = tot > 0 ? Math.round((cur / tot) * 100) : 0;
-        document.getElementById("prog-fill").style.width = pct + "%";
-        document.getElementById("prog-pct").textContent = pct + "%";
-        document.getElementById("prog-song").textContent = songTitle || "";
-        document.getElementById("loading-status").textContent =
-          tot > 0 ? cur + " of " + tot + " songs" : "Fetching discography…";
-      }
-      function toggleKey() {
-        const inp = document.getElementById("api-key-input");
-        const btn = document.getElementById("toggle-btn");
-        inp.type = inp.type === "password" ? "text" : "password";
-        btn.textContent = inp.type === "password" ? "show" : "hide";
-      }
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(el => el.classList.remove("active"));
+  document.getElementById("screen-" + id).classList.add("active");
+}
+function showError(msg) {
+  const el = document.getElementById("error-box");
+  el.textContent = msg; el.style.display = msg ? "block" : "none";
+}
+function setProgress(cur, tot, label) {
+  const pct = tot > 0 ? Math.round((cur / tot) * 100) : 0;
+  document.getElementById("prog-fill").style.width = pct + "%";
+  document.getElementById("prog-pct").textContent = pct + "%";
+  document.getElementById("prog-song").textContent = label || "";
+  document.getElementById("loading-status").textContent =
+    tot > 0 ? cur + " of " + tot + " songs" : label || "Working…";
+}
 
-      function extractLyrics(html) {
-        const doc = new DOMParser().parseFromString(html, "text/html");
-        const containers = doc.querySelectorAll(
-          '[data-lyrics-container="true"]',
-        );
-        if (!containers.length) return null;
-        function walk(node) {
-          let t = "";
-          node.childNodes.forEach((c) => {
-            if (c.nodeType === 3) t += c.textContent;
-            else if (c.nodeName === "BR") t += " ";
-            else if (!["SCRIPT", "STYLE", "HEAD"].includes(c.nodeName))
-              t += walk(c);
-          });
-          return t;
-        }
-        let full = "";
-        containers.forEach((c) => (full += " " + walk(c)));
-        return full
-          .toLowerCase()
-          .replace(/[^a-z0-9\s']/g, " ")
-          .replace(/\s+/g, " ")
-          .trim();
-      }
+function extractLyrics(html) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const containers = doc.querySelectorAll('[data-lyrics-container="true"]');
+  if (!containers.length) return null;
+  function walk(node) {
+    let t = "";
+    node.childNodes.forEach(c => {
+      if (c.nodeType === 3) t += c.textContent;
+      else if (c.nodeName === "BR") t += " ";
+      else if (!["SCRIPT","STYLE","HEAD"].includes(c.nodeName)) t += walk(c);
+    });
+    return t;
+  }
+  let full = "";
+  containers.forEach(c => full += " " + walk(c));
+  return full.toLowerCase().replace(/[^a-z0-9\s']/g, " ").replace(/\s+/g, " ").trim();
+}
 
-      function countWord(text, word) {
-        if (!text || !word) return 0;
-        const e = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        return (text.match(new RegExp("\\b" + e + "\\b", "g")) || []).length;
-      }
+function countWord(text, word) {
+  if (!text || !word) return 0;
+  const e = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return (text.match(new RegExp("\\b" + e + "\\b", "g")) || []).length;
+}
 
-      async function handleSearch() {
-        const apiKey = document.getElementById("api-key-input").value.trim();
-        const query = document.getElementById("artist-input").value.trim();
-        if (!apiKey || !query) {
-          showError("Please enter both an API key and an artist name.");
-          return;
-        }
-        showError("");
-        S.apiKey = apiKey;
-        S.shouldStop = false;
-        S.songs = [];
-        showScreen("loading");
-        setProgress(0, 0, "Searching…");
-        try {
-          const sd = await geniusFetch(
-            "/search?q=" + encodeURIComponent(query),
-          );
-          const hits = (sd.response?.hits || []).filter(
-            (h) => h.type === "song",
-          );
-          if (!hits.length) {
-            showScreen("setup");
-            showError("Artist not found on Genius.");
-            return;
-          }
-          const artist = hits[0].result.primary_artist;
-          S.artist = artist;
-          document.getElementById("loading-name").textContent = artist.name;
-          document.getElementById("loading-initials").textContent =
-            artist.name[0];
-          if (artist.image_url) {
-            const img = document.getElementById("loading-img");
-            img.src = artist.image_url;
-            img.style.display = "block";
-            document.getElementById("loading-initials").style.display = "none";
-          }
-          setProgress(0, 0, "Fetching song list…");
-          let allSongs = [],
-            page = 1;
-          while (!S.shouldStop) {
-            const d = await geniusFetch(
-              "/artists/" +
-                artist.id +
-                "/songs?per_page=50&page=" +
-                page +
-                "&sort=title",
-            );
-            const pageSongs = d.response?.songs || [];
-            const filtered = pageSongs.filter((s) => s.url);
-            allSongs = allSongs.concat(filtered);
-            if (pageSongs.length === 0 || allSongs.length >= 600) break;
-            page++;
-          }
-          const results = [];
-          for (let i = 0; i < allSongs.length; i++) {
-            if (S.shouldStop) break;
-            const song = allSongs[i];
-            setProgress(i + 1, allSongs.length, song.title);
-            try {
-              const html = await fetchPage(song.url);
-              const lyrics = extractLyrics(html);
-              const wc = lyrics
-                ? lyrics.split(/\s+/).filter(Boolean).length
-                : 0;
-              results.push({
-                title: song.title,
-                album: song.album?.name || null,
-                year:
-                  song.release_date_components?.year ||
-                  song.album?.release_date_components?.year ||
-                  null,
-                lyrics,
-                wordCount: wc,
-              });
-            } catch {}
-            await new Promise((r) => setTimeout(r, 220));
-          }
-          S.songs = results;
-          initAnalyze();
-          showScreen("analyze");
-        } catch (e) {
-          showScreen("setup");
-          showError("Something went wrong: " + (e.message || e));
-        }
-      }
+async function handleSearch() {
+  const query = document.getElementById("artist-input").value.trim();
+  if (!query) { showError("Please enter an artist name."); return; }
+  showError(""); S.shouldStop = false; S.albums = [];
+  showScreen("loading");
 
-      function stopFetch() {
-        S.shouldStop = true;
-      }
+  try {
+    // 1. Find artist
+    setProgress(0, 0, "Searching for artist…");
+    const sd = await geniusFetch("/search?q=" + encodeURIComponent(query));
+    const hits = (sd.response?.hits || []).filter(h => h.type === "song");
+    if (!hits.length) { showScreen("setup"); showError("Artist not found on Genius."); return; }
+    const artist = hits[0].result.primary_artist;
+    S.artist = artist;
+    document.getElementById("loading-name").textContent = artist.name;
+    document.getElementById("loading-initials").textContent = artist.name[0];
+    if (artist.image_url) {
+      const img = document.getElementById("loading-img");
+      img.src = artist.image_url; img.style.display = "block";
+      document.getElementById("loading-initials").style.display = "none";
+    }
 
-      function initAnalyze() {
-        const skipAlbum =
-          /\b(live|concert|tour|session|unplugged|acoustic|festival|mixtape|compilation|greatest hits|best of|collection|anthology|deluxe|remix|remixes|ep\b|single)\b/i;
-        const valid = S.songs.filter(
-          (s) => s.lyrics && s.album && !skipAlbum.test(s.album),
-        );
-        document.getElementById("hdr-artist").textContent =
-          S.artist?.name || "";
-        document.getElementById("stat-songs").textContent = valid.length;
-        const albums = new Set(
-          valid.filter((s) => s.album).map((s) => s.album),
-        );
-        document.getElementById("stat-albums").textContent = albums.size || "—";
-        const tw = valid.reduce((s, song) => s + song.wordCount, 0);
-        document.getElementById("stat-words").textContent =
-          tw > 999 ? Math.round(tw / 1000) + "k" : tw;
-        S.trackedWords = [];
-        document.getElementById("chip-list").innerHTML = "";
-        document.getElementById("empty-hint").style.display = "block";
-        document.getElementById("chart-empty").style.display = "flex";
-        document.getElementById("chart-container").style.display = "none";
-        if (S.chart) {
-          S.chart.destroy();
-          S.chart = null;
-        }
-      }
+    // 2. Fetch all albums
+    setProgress(0, 0, "Fetching albums…");
+    let allAlbums = [], page = 1;
+    while (!S.shouldStop) {
+      const d = await geniusFetch("/artists/" + artist.id + "/albums?per_page=50&page=" + page);
+      const pageAlbums = d.response?.albums || [];
+      allAlbums = allAlbums.concat(pageAlbums);
+      if (pageAlbums.length < 50) break;
+      page++;
+    }
 
-      function resetApp() {
-        S.songs = [];
-        S.artist = null;
-        S.trackedWords = [];
-        if (S.chart) {
-          S.chart.destroy();
-          S.chart = null;
-        }
-        showScreen("setup");
-      }
+    // 3. Filter to studio albums, sorted by year
+    const studioAlbums = allAlbums
+      .filter(a => !SKIP_ALBUM.test(a.name) && a.artist?.id === artist.id)
+      .sort((a, b) => (a.release_date_components?.year || 9999) - (b.release_date_components?.year || 9999));
 
-      function buildChartData() {
-        const valid = S.songs.filter((s) => s.lyrics);
-        if (!valid.length || !S.trackedWords.length) return null;
-        const groups = {};
-        valid.forEach((song) => {
-          const key = song.album || song.title;
-          if (!groups[key])
-            groups[key] = { name: key, year: song.year || 9999, songs: [] };
-          groups[key].songs.push(song);
-        });
-        const sorted = Object.values(groups).sort((a, b) => a.year - b.year);
-        const labels = sorted.map((g) =>
-          g.name.length > 24 ? g.name.substring(0, 22) + "…" : g.name,
-        );
-        const datasets = S.trackedWords.map((word, i) => ({
-          label: word,
-          data: sorted.map((group) => {
-            const tw = group.songs.reduce((s, song) => s + song.wordCount, 0);
-            const tc = group.songs.reduce(
-              (s, song) => s + countWord(song.lyrics, word),
-              0,
-            );
-            return tw > 0 ? Math.round((tc / tw) * 1000 * 10) / 10 : 0;
-          }),
-          borderColor: COLORS[i % COLORS.length],
-          backgroundColor: COLORS[i % COLORS.length] + "28",
-          pointBackgroundColor: COLORS[i % COLORS.length],
-          pointRadius: 5,
-          pointHoverRadius: 7,
-          tension: 0.3,
-          fill: false,
-          borderWidth: 2,
+    if (!studioAlbums.length) {
+      showScreen("setup");
+      showError("No studio albums found for this artist on Genius.");
+      return;
+    }
+
+    // 4. Fetch tracklists for each album
+    const albumSongLists = [];
+    for (const album of studioAlbums) {
+      if (S.shouldStop) break;
+      setProgress(0, 0, "Loading tracklist: " + album.name);
+      try {
+        const d = await geniusFetch("/albums/" + album.id + "/tracks?per_page=50");
+        const tracks = (d.response?.tracks || []).map(t => t.song).filter(s => s?.url);
+        albumSongLists.push({ album, tracks });
+      } catch {
+        albumSongLists.push({ album, tracks: [] });
+      }
+    }
+
+    // 5. Fetch lyrics, batched 5 at a time, with cache
+    const cache = getCache();
+    const totalSongs = albumSongLists.reduce((s, a) => s + a.tracks.length, 0);
+    let songsDone = 0;
+    const BATCH = 5;
+
+    for (const { album, tracks } of albumSongLists) {
+      if (S.shouldStop) break;
+      const albumSongs = [];
+      for (let i = 0; i < tracks.length; i += BATCH) {
+        if (S.shouldStop) break;
+        const batch = tracks.slice(i, i + BATCH);
+        const settled = await Promise.allSettled(batch.map(async song => {
+          if (cache[song.url]) return cache[song.url];
+          try {
+            const html = await fetchPage(song.url);
+            const lyrics = extractLyrics(html);
+            const wc = lyrics ? lyrics.split(/\s+/).filter(Boolean).length : 0;
+            const entry = { title: song.title, lyrics, wordCount: wc };
+            cache[song.url] = entry;
+            return entry;
+          } catch { return null; }
         }));
-        return { labels, datasets };
+        settled.forEach(r => { if (r.status === "fulfilled" && r.value) albumSongs.push(r.value); });
+        songsDone += batch.length;
+        setCache(cache);
+        setProgress(songsDone, totalSongs, album.name);
+        await new Promise(r => setTimeout(r, 150));
       }
+      S.albums.push({
+        name: album.name,
+        year: album.release_date_components?.year || null,
+        songs: albumSongs,
+      });
+    }
 
-      function updateChart() {
-        const data = buildChartData();
-        if (!data) {
-          document.getElementById("chart-empty").style.display = "flex";
-          document.getElementById("chart-container").style.display = "none";
-          return;
+    initAnalyze();
+    showScreen("analyze");
+
+  } catch (e) {
+    showScreen("setup");
+    showError("Something went wrong: " + (e.message || e));
+  }
+}
+
+function stopFetch() { S.shouldStop = true; }
+
+function initAnalyze() {
+  const validAlbums = S.albums.filter(a => a.songs.length > 0);
+  const totalSongs = validAlbums.reduce((s, a) => s + a.songs.length, 0);
+  const totalWords = validAlbums.reduce((s, a) => s + a.songs.reduce((ss, sg) => ss + sg.wordCount, 0), 0);
+  document.getElementById("hdr-artist").textContent = S.artist?.name || "";
+  document.getElementById("stat-albums").textContent = validAlbums.length;
+  document.getElementById("stat-songs").textContent = totalSongs;
+  document.getElementById("stat-words").textContent = totalWords > 999 ? Math.round(totalWords / 1000) + "k" : totalWords;
+  S.trackedWords = [];
+  document.getElementById("chip-list").innerHTML = "";
+  document.getElementById("empty-hint").style.display = "block";
+  document.getElementById("chart-empty").style.display = "flex";
+  document.getElementById("chart-container").style.display = "none";
+  if (S.chart) { S.chart.destroy(); S.chart = null; }
+}
+
+function resetApp() {
+  S.albums = []; S.artist = null; S.trackedWords = [];
+  if (S.chart) { S.chart.destroy(); S.chart = null; }
+  showScreen("setup");
+}
+
+function buildChartData() {
+  const validAlbums = S.albums.filter(a => a.songs.length > 0);
+  if (!validAlbums.length || !S.trackedWords.length) return null;
+  const labels = validAlbums.map(a => {
+    const label = a.year ? a.name + " (" + a.year + ")" : a.name;
+    return label.length > 28 ? label.substring(0, 26) + "…" : label;
+  });
+  const datasets = S.trackedWords.map((word, i) => ({
+    label: word,
+    data: validAlbums.map(album => {
+      const tw = album.songs.reduce((s, sg) => s + sg.wordCount, 0);
+      const tc = album.songs.reduce((s, sg) => s + countWord(sg.lyrics, word), 0);
+      return tw > 0 ? Math.round((tc / tw) * 1000 * 10) / 10 : 0;
+    }),
+    borderColor: COLORS[i % COLORS.length],
+    backgroundColor: COLORS[i % COLORS.length] + "28",
+    pointBackgroundColor: COLORS[i % COLORS.length],
+    pointRadius: 6, pointHoverRadius: 8,
+    tension: 0.3, fill: false, borderWidth: 2,
+  }));
+  return { labels, datasets };
+}
+
+function updateChart() {
+  const data = buildChartData();
+  if (!data) {
+    document.getElementById("chart-empty").style.display = "flex";
+    document.getElementById("chart-container").style.display = "none";
+    return;
+  }
+  document.getElementById("chart-empty").style.display = "none";
+  document.getElementById("chart-container").style.display = "flex";
+  document.getElementById("chart-legend").innerHTML = S.trackedWords.map((w, i) =>
+    `<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:${COLORS[i % COLORS.length]};"></span>${w}</span>`
+  ).join("");
+  const isDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+  const gridCol = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)";
+  const tickCol = isDark ? "rgba(200,195,185,0.5)" : "rgba(80,75,65,0.6)";
+  const ttBg = isDark ? "rgba(25,23,20,0.96)" : "rgba(255,255,255,0.97)";
+  const ttBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
+  const ttText = isDark ? "#e8e3da" : "#1a1917";
+  if (S.chart) {
+    S.chart.data.labels = data.labels;
+    S.chart.data.datasets = data.datasets;
+    S.chart.update();
+  } else {
+    const ctx = document.getElementById("lyricsChart").getContext("2d");
+    S.chart = new Chart(ctx, {
+      type: "line", data,
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: ttBg, borderColor: ttBorder, borderWidth: 1,
+            titleColor: tickCol, bodyColor: ttText,
+            callbacks: { label: ctx => `"${ctx.dataset.label}": ${ctx.parsed.y.toFixed(1)} per 1k words` }
+          }
+        },
+        scales: {
+          x: { grid: { color: gridCol }, ticks: { maxRotation: 35, font: { size: 11 }, color: tickCol, autoSkip: false }, border: { display: false } },
+          y: { grid: { color: gridCol }, ticks: { font: { size: 11 }, color: tickCol }, border: { display: false }, beginAtZero: true }
         }
-        document.getElementById("chart-empty").style.display = "none";
-        document.getElementById("chart-container").style.display = "flex";
-        document.getElementById("chart-legend").innerHTML = S.trackedWords
-          .map(
-            (w, i) =>
-              `<span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:${COLORS[i % COLORS.length]};"></span>${w}</span>`,
-          )
-          .join("");
-        const isDark = window.matchMedia?.(
-          "(prefers-color-scheme: dark)",
-        ).matches;
-        const gridCol = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)";
-        const tickCol = isDark ? "rgba(200,195,185,0.5)" : "rgba(80,75,65,0.6)";
-        const ttBg = isDark ? "rgba(25,23,20,0.96)" : "rgba(255,255,255,0.97)";
-        const ttBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
-        const ttText = isDark ? "#e8e3da" : "#1a1917";
-        if (S.chart) {
-          S.chart.data.labels = data.labels;
-          S.chart.data.datasets = data.datasets;
-          S.chart.update();
-        } else {
-          const ctx = document.getElementById("lyricsChart").getContext("2d");
-          S.chart = new Chart(ctx, {
-            type: "line",
-            data,
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: { display: false },
-                tooltip: {
-                  backgroundColor: ttBg,
-                  borderColor: ttBorder,
-                  borderWidth: 1,
-                  titleColor: tickCol,
-                  bodyColor: ttText,
-                  callbacks: {
-                    label: (ctx) =>
-                      `"${ctx.dataset.label}": ${ctx.parsed.y.toFixed(1)} per 1k words`,
-                  },
-                },
-              },
-              scales: {
-                x: {
-                  grid: { color: gridCol },
-                  ticks: {
-                    maxRotation: 40,
-                    font: { size: 10 },
-                    color: tickCol,
-                    autoSkip: false,
-                  },
-                  border: { display: false },
-                },
-                y: {
-                  grid: { color: gridCol },
-                  ticks: { font: { size: 10 }, color: tickCol },
-                  border: { display: false },
-                  beginAtZero: true,
-                },
-              },
-            },
-          });
-        }
       }
+    });
+  }
+}
 
-      function addWord() {
-        const inp = document.getElementById("word-input");
-        const w = inp.value.trim().toLowerCase();
-        if (
-          !w ||
-          S.trackedWords.includes(w) ||
-          S.trackedWords.length >= COLORS.length
-        )
-          return;
-        inp.value = "";
-        S.trackedWords.push(w);
-        renderChips();
-        updateChart();
-      }
+function addWord() {
+  const inp = document.getElementById("word-input");
+  const w = inp.value.trim().toLowerCase();
+  if (!w || S.trackedWords.includes(w) || S.trackedWords.length >= COLORS.length) return;
+  inp.value = ""; S.trackedWords.push(w);
+  renderChips(); updateChart();
+}
 
-      function removeWord(w) {
-        S.trackedWords = S.trackedWords.filter((x) => x !== w);
-        renderChips();
-        updateChart();
-      }
+function removeWord(w) {
+  S.trackedWords = S.trackedWords.filter(x => x !== w);
+  renderChips(); updateChart();
+}
 
-      function renderChips() {
-        const cl = document.getElementById("chip-list");
-        const eh = document.getElementById("empty-hint");
-        if (!S.trackedWords.length) {
-          cl.innerHTML = "";
-          eh.style.display = "block";
-          return;
-        }
-        eh.style.display = "none";
-        cl.innerHTML = S.trackedWords
-          .map(
-            (w, i) =>
-              `<div class="word-chip" style="border-left:3px solid ${COLORS[i % COLORS.length]};">
+function renderChips() {
+  const cl = document.getElementById("chip-list");
+  const eh = document.getElementById("empty-hint");
+  if (!S.trackedWords.length) { cl.innerHTML = ""; eh.style.display = "block"; return; }
+  eh.style.display = "none";
+  cl.innerHTML = S.trackedWords.map((w, i) =>
+    `<div class="word-chip" style="border-left:3px solid ${COLORS[i % COLORS.length]};">
       <div class="chip-dot" style="background:${COLORS[i % COLORS.length]};"></div>
       <span style="flex:1;">${w}</span>
       <button class="chip-remove" onclick="removeWord('${w}')">×</button>
-    </div>`,
-          )
-          .join("");
-      }
-    </script>
-  </body>
+    </div>`
+  ).join("");
+}
+</script>
+</body>
 </html>
