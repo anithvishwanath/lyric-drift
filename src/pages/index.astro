@@ -225,7 +225,7 @@ async function handleSearch() {
 
   try {
     setProgress(0, 0, "Fetching tracks from lrclib…");
-    const res = await fetch("https://lrclib.net/api/search?artist_name=" + encodeURIComponent(query));
+    const res = await fetch("https://lrclib.net/api/search?q=" + encodeURIComponent(query));
     if (!res.ok) throw new Error("lrclib returned HTTP " + res.status);
     const tracks = await res.json();
 
