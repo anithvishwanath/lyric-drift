@@ -249,6 +249,29 @@ function countWord(text, word) {
   return (text.match(new RegExp("\\b" + e + "\\b", "g")) || []).length;
 }
 
+function extractTracksFromAlbumPage(html) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const seen = new Set();
+  const tracks = [];
+  // Genius song URLs end in -lyrics and are on genius.com
+  doc.querySelectorAll("a[href]").forEach(a => {
+    const href = a.href;
+    if (
+      href &&
+      href.includes("genius.com/") &&
+      href.endsWith("-lyrics") &&
+      !href.includes("/albums/") &&
+      !href.includes("/artists/") &&
+      !seen.has(href)
+    ) {
+      seen.add(href);
+      const title = a.textContent.trim() || href.split("/").pop().replace(/-lyrics$/, "").replace(/-/g, " ");
+      tracks.push({ url: href, title });
+    }
+  });
+  return tracks;
+}
+
 async function handleSearch() {
   const query = document.getElementById("artist-input").value.trim();
   if (!query) { showError("Please enter an artist name."); return; }
@@ -293,14 +316,14 @@ async function handleSearch() {
       return;
     }
 
-    // 4. Fetch tracklists for each album
+    // 4. Scrape tracklists from each album's Genius page
     const albumSongLists = [];
     for (const album of studioAlbums) {
       if (S.shouldStop) break;
       setProgress(0, 0, "Loading tracklist: " + album.name);
       try {
-        const d = await geniusFetch("/albums/" + album.id + "/tracks?per_page=50");
-        const tracks = (d.response?.tracks || []).map(t => t.song).filter(s => s?.url);
+        const html = await fetchPage(album.url);
+        const tracks = extractTracksFromAlbumPage(html);
         albumSongLists.push({ album, tracks });
       } catch {
         albumSongLists.push({ album, tracks: [] });
