@@ -113,7 +113,7 @@
     </div>
     <button onclick="handleSearch()" style="width:100%;padding:0.85rem;">Begin Analysis →</button>
     <div style="margin-top:1.8rem;display:flex;gap:1.2rem;font-family:var(--font-mono);font-size:0.58rem;color:var(--color-text-tertiary);">
-      <span>lyrics via lrclib.net</span><span>·</span><span>no api key needed</span><span>·</span><span>studio albums only</span>
+      <span>lyrics via lrclib.net</span><span>·</span><span>no api key needed</span><span>·</span><span>studio albums curated</span>
     </div>
   </div>
 </div>
@@ -188,6 +188,148 @@
 
 <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script is:inline>
+const DISCOGRAPHIES = {
+  "Kendrick Lamar": [
+    {
+      "name": "Section.80",
+      "year": 2011,
+      "tracks": [
+        "Fuck Your Ethnicity",
+        "Hol' Up",
+        "A.D.H.D",
+        "No Joke",
+        "Chapter Six",
+        "Rigamortis",
+        "Institutionalized",
+        "Chapter Ten",
+        "Ronald Reagan Era",
+        "Poe Man's Dreams",
+        "Blow My High",
+        "Alien Girl",
+        "No Makeup",
+        "Keisha's Song",
+        "HiiiPoWeR"
+      ]
+    },
+    {
+      "name": "good kid, m.A.A.d city",
+      "year": 2012,
+      "tracks": [
+        "Sherane a.k.a Master Splinter's Daughter",
+        "Bitch, Don't Kill My Vibe",
+        "Backseat Freestyle",
+        "The Art of Peer Pressure",
+        "Money Trees",
+        "Poetic Justice",
+        "Good Kid",
+        "m.A.A.d city",
+        "Swimming Pools (Drank)",
+        "Sing About Me, I'm Dying of Thirst",
+        "Real",
+        "Compton"
+      ]
+    },
+    {
+      "name": "To Pimp a Butterfly",
+      "year": 2015,
+      "tracks": [
+        "Wesley's Theory",
+        "For Free?",
+        "King Kunta",
+        "Institutionalized",
+        "These Walls",
+        "u",
+        "Alright",
+        "For Sale?",
+        "Momma",
+        "Hood Politics",
+        "How Much a Dollar Cost",
+        "Complexion",
+        "The Blacker the Berry",
+        "You Ain't Gotta Lie",
+        "i",
+        "Mortal Man"
+      ]
+    },
+    {
+      "name": "untitled unmastered.",
+      "year": 2016,
+      "tracks": [
+        "untitled 01",
+        "untitled 02",
+        "untitled 03",
+        "untitled 04",
+        "untitled 05",
+        "untitled 06",
+        "untitled 07",
+        "untitled 08"
+      ]
+    },
+    {
+      "name": "DAMN.",
+      "year": 2017,
+      "tracks": [
+        "BLOOD.",
+        "DNA.",
+        "YAH.",
+        "ELEMENT.",
+        "FEEL.",
+        "LOYALTY.",
+        "PRIDE.",
+        "HUMBLE.",
+        "LUST.",
+        "LOVE.",
+        "XXX.",
+        "FEAR.",
+        "GOD.",
+        "DUCKWORTH."
+      ]
+    },
+    {
+      "name": "Mr. Morale & The Big Steppers",
+      "year": 2022,
+      "tracks": [
+        "United in Grief",
+        "N95",
+        "Worldwide Steppers",
+        "Die Hard",
+        "Father Time",
+        "Rich (Interlude)",
+        "Rich Spirit",
+        "We Cry Together",
+        "Purple Hearts",
+        "Count Me Out",
+        "Crown",
+        "Silent Hill",
+        "Savior (Interlude)",
+        "Savior",
+        "Auntie Diaries",
+        "Mr. Morale",
+        "Mother I Sober",
+        "Mirror"
+      ]
+    },
+    {
+      "name": "GNX",
+      "year": 2024,
+      "tracks": [
+        "wacced out murals",
+        "squabble up",
+        "luther",
+        "man at the garden",
+        "hey now",
+        "reincarnated",
+        "tv off",
+        "dodger blue",
+        "peekaboo",
+        "heart pt. 6",
+        "gloria",
+        "gnx"
+      ]
+    }
+  ]
+};
+
 const COLORS = ["#7F77DD","#1D9E75","#D85A30","#D4537E","#378ADD","#BA7517","#E24B4A","#639922"];
 const SKIP_ALBUM = /\b(live|concert|tour|session|unplugged|acoustic|festival|mixtape|compilation|greatest hits|best of|collection|anthology|remix|remixes|\bep\b|single|instrumental|karaoke|tribute|cover|deluxe)\b/i;
 const S = { artistName: "", albums: [], trackedWords: [], chart: null };
@@ -215,7 +357,7 @@ function countWord(text, word) {
 
 async function handleSearch() {
   const query = document.getElementById("artist-input").value.trim();
-  if (!query) { showError("Please enter an artist name."); return; }
+  if (!query) { showError("Please select an artist."); return; }
   showError(""); S.albums = []; S.artistName = query;
   showScreen("loading");
   document.getElementById("loading-name").textContent = query;
@@ -224,57 +366,39 @@ async function handleSearch() {
   document.getElementById("loading-initials").style.display = "";
 
   try {
-    setProgress(0, 0, "Fetching tracks from lrclib…");
-    const res = await fetch("https://lrclib.net/api/search?q=" + encodeURIComponent(query));
-    if (!res.ok) throw new Error("lrclib returned HTTP " + res.status);
-    const tracks = await res.json();
+    const discography = DISCOGRAPHIES[query];
+    if (!discography) { showScreen("setup"); showError("No discography found for this artist."); return; }
 
-    if (!tracks.length) {
-      showScreen("setup");
-      showError("No lyrics found for \"" + query + "\". Try a slightly different spelling.");
-      return;
+    const totalTracks = discography.reduce((s, a) => s + a.tracks.length, 0);
+    let done = 0;
+
+    for (const album of discography) {
+      const albumSongs = [];
+      for (const trackName of album.tracks) {
+        setProgress(done, totalTracks, trackName);
+        try {
+          const res = await fetch(
+            "https://lrclib.net/api/get?artist_name=" + encodeURIComponent(query) +
+            "&track_name=" + encodeURIComponent(trackName) +
+            "&album_name=" + encodeURIComponent(album.name)
+          );
+          if (res.ok) {
+            const data = await res.json();
+            const raw = data.plainLyrics || "";
+            if (raw) {
+              const lyrics = raw.toLowerCase().replace(/[^a-z0-9\s']/g, " ").replace(/\s+/g, " ").trim();
+              const wordCount = lyrics.split(/\s+/).filter(Boolean).length;
+              albumSongs.push({ title: trackName, lyrics, wordCount });
+            }
+          }
+        } catch {}
+        done++;
+        await new Promise(r => setTimeout(r, 80));
+      }
+      S.albums.push({ name: album.name, year: album.year, songs: albumSongs });
     }
 
-    // Filter: artist name must match, must have album + lyrics, skip non-studio albums
-    const artistLower = query.toLowerCase();
-    const filtered = tracks.filter(t =>
-      t.artistName?.toLowerCase().includes(artistLower) &&
-      t.albumName &&
-      t.plainLyrics &&
-      !SKIP_ALBUM.test(t.albumName)
-    );
-
-    if (!filtered.length) {
-      showScreen("setup");
-      showError("Tracks found but none had lyrics and album data. Try another artist.");
-      return;
-    }
-
-    // Group by album, deduplicate tracks
-    const albumMap = {};
-    for (const track of filtered) {
-      const album = track.albumName.trim();
-      if (!albumMap[album]) albumMap[album] = { name: album, songs: [], seen: new Set() };
-      const key = (track.trackName || "").toLowerCase().trim();
-      if (key && albumMap[album].seen.has(key)) continue;
-      albumMap[album].seen.add(key);
-      const lyrics = track.plainLyrics.toLowerCase().replace(/[^a-z0-9\s']/g, " ").replace(/\s+/g, " ").trim();
-      const wordCount = lyrics.split(/\s+/).filter(Boolean).length;
-      albumMap[album].songs.push({ title: track.trackName, lyrics, wordCount });
-    }
-
-    // Keep albums with at least 3 matched tracks, sort alphabetically
-    // (lrclib doesn't return release dates reliably)
-    S.albums = Object.values(albumMap)
-      .filter(a => a.songs.length >= 3)
-      .sort((a, b) => a.name.localeCompare(b.name));
-
-    if (!S.albums.length) {
-      showScreen("setup");
-      showError("Couldn't find enough complete albums. The artist name may need to be more specific.");
-      return;
-    }
-
+    S.albums.sort((a, b) => (a.year || 0) - (b.year || 0));
     initAnalyze();
     showScreen("analyze");
 
@@ -309,7 +433,7 @@ function resetApp() {
 
 function buildChartData() {
   if (!S.albums.length || !S.trackedWords.length) return null;
-  const labels = S.albums.map(a => a.name.length > 28 ? a.name.substring(0, 26) + "…" : a.name);
+  const labels = S.albums.map(a => { const l = a.year ? a.name + " (" + a.year + ")" : a.name; return l.length > 32 ? l.substring(0, 30) + "…" : l; });
   const datasets = S.trackedWords.map((word, i) => ({
     label: word,
     data: S.albums.map(album => {
