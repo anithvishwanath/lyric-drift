@@ -311,7 +311,7 @@ async function handleSearch() {
     const cache = getCache();
     const totalSongs = albumSongLists.reduce((s, a) => s + a.tracks.length, 0);
     let songsDone = 0;
-    const BATCH = 5;
+    const BATCH = 2;
 
     for (const { album, tracks } of albumSongLists) {
       if (S.shouldStop) break;
@@ -334,7 +334,7 @@ async function handleSearch() {
         songsDone += batch.length;
         setCache(cache);
         setProgress(songsDone, totalSongs, album.name);
-        await new Promise(r => setTimeout(r, 150));
+        await new Promise(r => setTimeout(r, 400));
       }
       S.albums.push({
         name: album.name,
