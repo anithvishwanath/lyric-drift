@@ -249,6 +249,35 @@ function countWord(text, word) {
   return (text.match(new RegExp("\\b" + e + "\\b", "g")) || []).length;
 }
 
+function extractAlbumsFromArtistPage(html, artistId) {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const seen = new Set();
+  const albums = [];
+  // Genius album URLs: genius.com/albums/Artist-name/Album-name
+  doc.querySelectorAll("a[href]").forEach(a => {
+    const href = a.href;
+    if (
+      href &&
+      href.includes("genius.com/albums/") &&
+      !seen.has(href)
+    ) {
+      seen.add(href);
+      // Try to find album name from nearby text or the URL itself
+      const urlName = href.split("/albums/")[1] || "";
+      const parts = urlName.split("/");
+      const albumSlug = parts[1] || parts[0] || "";
+      const name = a.closest("[class*='album']")?.querySelector("[class*='title']")?.textContent.trim()
+        || a.querySelector("[class*='title']")?.textContent.trim()
+        || a.textContent.trim()
+        || albumSlug.replace(/-/g, " ");
+      if (name && albumSlug) {
+        albums.push({ url: href, name, id: albumSlug });
+      }
+    }
+  });
+  return albums;
+}
+
 function extractTracksFromAlbumPage(html) {
   const doc = new DOMParser().parseFromString(html, "text/html");
   const seen = new Set();
@@ -294,21 +323,20 @@ async function handleSearch() {
       document.getElementById("loading-initials").style.display = "none";
     }
 
-    // 2. Fetch all albums
+    // 2. Scrape artist page to get albums
     setProgress(0, 0, "Fetching albums…");
-    let allAlbums = [], page = 1;
-    while (!S.shouldStop) {
-      const d = await geniusFetch("/artists/" + artist.id + "/albums?per_page=50&page=" + page);
-      const pageAlbums = d.response?.albums || [];
-      allAlbums = allAlbums.concat(pageAlbums);
-      if (pageAlbums.length < 50) break;
-      page++;
-    }
+    const artistPageUrl = "https://genius.com/artists/" + encodeURIComponent(artist.name.replace(/\s+/g, "-"));
+    const artistHtml = await fetchPage(artistPageUrl);
+    const scrapedAlbums = extractAlbumsFromArtistPage(artistHtml, artist.id);
 
-    // 3. Filter to studio albums, sorted by year
-    const studioAlbums = allAlbums
-      .filter(a => !SKIP_ALBUM.test(a.name) && a.artist?.id === artist.id)
-      .sort((a, b) => (a.release_date_components?.year || 9999) - (b.release_date_components?.year || 9999));
+    // 3. Filter to studio albums, deduplicate, preserve page order (which is chronological on Genius)
+    const seenAlbumUrls = new Set();
+    const studioAlbums = scrapedAlbums.filter(a => {
+      if (SKIP_ALBUM.test(a.name)) return false;
+      if (seenAlbumUrls.has(a.url)) return false;
+      seenAlbumUrls.add(a.url);
+      return true;
+    });
 
     if (!studioAlbums.length) {
       showScreen("setup");
@@ -334,7 +362,7 @@ async function handleSearch() {
     const cache = getCache();
     const totalSongs = albumSongLists.reduce((s, a) => s + a.tracks.length, 0);
     let songsDone = 0;
-    const BATCH = 2;
+    const BATCH = 5;
 
     for (const { album, tracks } of albumSongLists) {
       if (S.shouldStop) break;
@@ -357,7 +385,7 @@ async function handleSearch() {
         songsDone += batch.length;
         setCache(cache);
         setProgress(songsDone, totalSongs, album.name);
-        await new Promise(r => setTimeout(r, 400));
+        await new Promise(r => setTimeout(r, 150));
       }
       S.albums.push({
         name: album.name,
