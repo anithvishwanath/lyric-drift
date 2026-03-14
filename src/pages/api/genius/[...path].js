@@ -1,13 +1,13 @@
 export const prerender = false;
 
-export async function GET({ params, request, url }) {
+export async function GET({ params, request }) {
+  const token = import.meta.env.GENIUS_API_KEY;
+  if (!token) {
+    return new Response(JSON.stringify({ error: "GENIUS_API_KEY env var not set" }), { status: 500 });
+  }
+
   const geniusPath = params.path ? "/" + params.path : "";
   const searchParams = new URL(request.url).searchParams;
-
-  const token = searchParams.get("access_token");
-  if (!token) {
-    return new Response(JSON.stringify({ error: "Missing access_token" }), { status: 401 });
-  }
 
   const fwd = new URLSearchParams();
   for (const [k, v] of searchParams.entries()) {
