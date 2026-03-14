@@ -1,7 +1,7 @@
 export const prerender = false;
 
 export async function GET({ params, request }) {
-  const token = import.meta.env.GENIUS_API_KEY;
+  const token = process.meta.env.GENIUS_API_KEY;
   if (!token) {
     return new Response(JSON.stringify({ error: "GENIUS_API_KEY env var not set" }), { status: 500 });
   }
