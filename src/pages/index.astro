@@ -1,5 +1,12 @@
 ---
 // Lyric Drift — src/pages/index.astro
+import kendrick from "../data/kendrick.json";
+import linkinpark from "../data/linkinpark.json";
+
+const discographies = {
+  "Kendrick Lamar": kendrick,
+  "Linkin Park": linkinpark
+};
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -109,7 +116,11 @@
     <div id="error-box" class="error-box"></div>
     <div style="margin-bottom:1.4rem;">
       <label class="field-label" for="artist-input">Artist</label>
-      <input type="text" id="artist-input" placeholder="e.g. Radiohead, Phoebe Bridgers, Kendrick…" style="width:100%;" onkeydown="if(event.key==='Enter') handleSearch()" />
+      <select id="artist-input" style="width:100%;appearance:none;-webkit-appearance:none;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22><path fill=%22%23888780%22 d=%22M1 1l5 5 5-5%22 stroke=%22%23888780%22 stroke-width=%221.5%22 fill=%22none%22/></svg>');background-repeat:no-repeat;background-position:right 0.85rem center;padding-right:2.2rem;cursor:pointer;">
+        <option value="Kendrick Lamar">Kendrick Lamar</option>
+        <option value="The Beatles">The Beatles</option>
+        <option value="Linkin Park">Linkin Park</option>
+      </select>
     </div>
     <button onclick="handleSearch()" style="width:100%;padding:0.85rem;">Begin Analysis →</button>
     <div style="margin-top:1.8rem;display:flex;gap:1.2rem;font-family:var(--font-mono);font-size:0.58rem;color:var(--color-text-tertiary);">
@@ -187,149 +198,8 @@
 </div>
 
 <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script is:inline>
-const DISCOGRAPHIES = {
-  "Kendrick Lamar": [
-    {
-      "name": "Section.80",
-      "year": 2011,
-      "tracks": [
-        "Fuck Your Ethnicity",
-        "Hol' Up",
-        "A.D.H.D",
-        "No Joke",
-        "Chapter Six",
-        "Rigamortis",
-        "Institutionalized",
-        "Chapter Ten",
-        "Ronald Reagan Era",
-        "Poe Man's Dreams",
-        "Blow My High",
-        "Alien Girl",
-        "No Makeup",
-        "Keisha's Song",
-        "HiiiPoWeR"
-      ]
-    },
-    {
-      "name": "good kid, m.A.A.d city",
-      "year": 2012,
-      "tracks": [
-        "Sherane a.k.a Master Splinter's Daughter",
-        "Bitch, Don't Kill My Vibe",
-        "Backseat Freestyle",
-        "The Art of Peer Pressure",
-        "Money Trees",
-        "Poetic Justice",
-        "Good Kid",
-        "m.A.A.d city",
-        "Swimming Pools (Drank)",
-        "Sing About Me, I'm Dying of Thirst",
-        "Real",
-        "Compton"
-      ]
-    },
-    {
-      "name": "To Pimp a Butterfly",
-      "year": 2015,
-      "tracks": [
-        "Wesley's Theory",
-        "For Free?",
-        "King Kunta",
-        "Institutionalized",
-        "These Walls",
-        "u",
-        "Alright",
-        "For Sale?",
-        "Momma",
-        "Hood Politics",
-        "How Much a Dollar Cost",
-        "Complexion",
-        "The Blacker the Berry",
-        "You Ain't Gotta Lie",
-        "i",
-        "Mortal Man"
-      ]
-    },
-    {
-      "name": "untitled unmastered.",
-      "year": 2016,
-      "tracks": [
-        "untitled 01",
-        "untitled 02",
-        "untitled 03",
-        "untitled 04",
-        "untitled 05",
-        "untitled 06",
-        "untitled 07",
-        "untitled 08"
-      ]
-    },
-    {
-      "name": "DAMN.",
-      "year": 2017,
-      "tracks": [
-        "BLOOD.",
-        "DNA.",
-        "YAH.",
-        "ELEMENT.",
-        "FEEL.",
-        "LOYALTY.",
-        "PRIDE.",
-        "HUMBLE.",
-        "LUST.",
-        "LOVE.",
-        "XXX.",
-        "FEAR.",
-        "GOD.",
-        "DUCKWORTH."
-      ]
-    },
-    {
-      "name": "Mr. Morale & The Big Steppers",
-      "year": 2022,
-      "tracks": [
-        "United in Grief",
-        "N95",
-        "Worldwide Steppers",
-        "Die Hard",
-        "Father Time",
-        "Rich (Interlude)",
-        "Rich Spirit",
-        "We Cry Together",
-        "Purple Hearts",
-        "Count Me Out",
-        "Crown",
-        "Silent Hill",
-        "Savior (Interlude)",
-        "Savior",
-        "Auntie Diaries",
-        "Mr. Morale",
-        "Mother I Sober",
-        "Mirror"
-      ]
-    },
-    {
-      "name": "GNX",
-      "year": 2024,
-      "tracks": [
-        "wacced out murals",
-        "squabble up",
-        "luther",
-        "man at the garden",
-        "hey now",
-        "reincarnated",
-        "tv off",
-        "dodger blue",
-        "peekaboo",
-        "heart pt. 6",
-        "gloria",
-        "gnx"
-      ]
-    }
-  ]
-};
-
+<script is:inline define:vars={{ discographies }}>
+const DISCOGRAPHIES = discographies;
 const COLORS = ["#7F77DD","#1D9E75","#D85A30","#D4537E","#378ADD","#BA7517","#E24B4A","#639922"];
 const SKIP_ALBUM = /\b(live|concert|tour|session|unplugged|acoustic|festival|mixtape|compilation|greatest hits|best of|collection|anthology|remix|remixes|\bep\b|single|instrumental|karaoke|tribute|cover|deluxe)\b/i;
 const S = { artistName: "", albums: [], trackedWords: [], chart: null };
@@ -448,7 +318,7 @@ function getTopWords(n) {
     "these","those","much","too","very","own","off","again","where","both",
     "few","more","most","other","into","only","also","new","first","last",
     "long","great","little","own","right","big","high","different","small",
-    "large","next","early","young","important","public","private", "ooh", "hey"
+    "large","next","early","young","important","public","private", "ooh", "hey",
   ]);
 
   // Count every word across all albums
@@ -457,7 +327,7 @@ function getTopWords(n) {
     for (const song of album.songs) {
       if (!song.lyrics) continue;
       for (const word of song.lyrics.split(/\s+/)) {
-        const w = word.replace(/[^a-z']/g, "");
+        const w = word.replace(/[^a-z']/g, "").replace(/[\u2018\u2019\u201A\u201B]/g, "'");
         if (w.length < 3) continue;
         if (STOP.has(w)) continue;
         freq[w] = (freq[w] || 0) + 1;
