@@ -358,34 +358,37 @@ async function handleSearch() {
       }
     }
 
-    // 5. Fetch lyrics, batched 5 at a time, with cache
+    // 5. Fetch lyrics sequentially with cache and human-paced delays
     const cache = getCache();
     const totalSongs = albumSongLists.reduce((s, a) => s + a.tracks.length, 0);
     let songsDone = 0;
-    const BATCH = 5;
+
+    function humanDelay() {
+      // Random 600–1400ms — enough to not look like a bot
+      return new Promise(r => setTimeout(r, 600 + Math.random() * 800));
+    }
 
     for (const { album, tracks } of albumSongLists) {
       if (S.shouldStop) break;
       const albumSongs = [];
-      for (let i = 0; i < tracks.length; i += BATCH) {
+      for (const song of tracks) {
         if (S.shouldStop) break;
-        const batch = tracks.slice(i, i + BATCH);
-        const settled = await Promise.allSettled(batch.map(async song => {
-          if (cache[song.url]) return cache[song.url];
-          try {
-            const html = await fetchPage(song.url);
-            const lyrics = extractLyrics(html);
-            const wc = lyrics ? lyrics.split(/\s+/).filter(Boolean).length : 0;
-            const entry = { title: song.title, lyrics, wordCount: wc };
-            cache[song.url] = entry;
-            return entry;
-          } catch { return null; }
-        }));
-        settled.forEach(r => { if (r.status === "fulfilled" && r.value) albumSongs.push(r.value); });
-        songsDone += batch.length;
-        setCache(cache);
-        setProgress(songsDone, totalSongs, album.name);
-        await new Promise(r => setTimeout(r, 150));
+        songsDone++;
+        setProgress(songsDone, totalSongs, song.title);
+        if (cache[song.url]) {
+          albumSongs.push(cache[song.url]);
+          continue;
+        }
+        try {
+          const html = await fetchPage(song.url);
+          const lyrics = extractLyrics(html);
+          const wc = lyrics ? lyrics.split(/\s+/).filter(Boolean).length : 0;
+          const entry = { title: song.title, lyrics, wordCount: wc };
+          cache[song.url] = entry;
+          setCache(cache);
+          albumSongs.push(entry);
+        } catch { /* skip failed songs */ }
+        await humanDelay();
       }
       S.albums.push({
         name: album.name,
