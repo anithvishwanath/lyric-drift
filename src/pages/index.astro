@@ -104,7 +104,7 @@
     <div class="eyebrow">Word frequency tracker</div>
     <h1 class="app-title">Lyric<br><em>Drift</em></h1>
     <p style="font-size:0.82rem;color:var(--color-text-tertiary);margin-bottom:2.2rem;line-height:1.5;">
-      Track how often words appear across a band's studio albums — album by album.
+      Track how often words appear across an artist's studio albums — album by album.
     </p>
     <div id="error-box" class="error-box"></div>
     <div style="margin-bottom:1.4rem;">
@@ -113,7 +113,7 @@
     </div>
     <button onclick="handleSearch()" style="width:100%;padding:0.85rem;">Begin Analysis →</button>
     <div style="margin-top:1.8rem;display:flex;gap:1.2rem;font-family:var(--font-mono);font-size:0.58rem;color:var(--color-text-tertiary);">
-      <span>lyrics via genius.com</span><span>·</span><span>studio albums only</span><span>·</span><span>no data stored</span>
+      <span>lyrics via lrclib.net</span><span>·</span><span>no api key needed</span><span>·</span><span>studio albums only</span>
     </div>
   </div>
 </div>
@@ -189,24 +189,8 @@
 <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script is:inline>
 const COLORS = ["#7F77DD","#1D9E75","#D85A30","#D4537E","#378ADD","#BA7517","#E24B4A","#639922"];
-const SKIP_ALBUM = /\b(live|concert|tour|session|unplugged|acoustic|festival|mixtape|compilation|greatest hits|best of|collection|anthology|deluxe|remix|remixes|\bep\b|single|instrumental|karaoke|tribute|cover)\b/i;
-const S = { artist: null, albums: [], trackedWords: [], shouldStop: false, chart: null };
-
-const CACHE_KEY = "lyricdrift_v1";
-function getCache() { try { return JSON.parse(localStorage.getItem(CACHE_KEY) || "{}"); } catch { return {}; } }
-function setCache(c) { try { localStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch {} }
-
-async function geniusFetch(path) {
-  const r = await fetch("/api/genius" + path);
-  if (!r.ok) throw new Error("HTTP " + r.status + " from Genius API");
-  return r.json();
-}
-
-async function fetchPage(songUrl) {
-  const r = await fetch("/api/page?url=" + encodeURIComponent(songUrl));
-  if (!r.ok) throw new Error("HTTP " + r.status);
-  return r.text();
-}
+const SKIP_ALBUM = /\b(live|concert|tour|session|unplugged|acoustic|festival|mixtape|compilation|greatest hits|best of|collection|anthology|remix|remixes|\bep\b|single|instrumental|karaoke|tribute|cover|deluxe)\b/i;
+const S = { artistName: "", albums: [], trackedWords: [], chart: null };
 
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach(el => el.classList.remove("active"));
@@ -221,180 +205,74 @@ function setProgress(cur, tot, label) {
   document.getElementById("prog-fill").style.width = pct + "%";
   document.getElementById("prog-pct").textContent = pct + "%";
   document.getElementById("prog-song").textContent = label || "";
-  document.getElementById("loading-status").textContent =
-    tot > 0 ? cur + " of " + tot + " songs" : label || "Working…";
+  document.getElementById("loading-status").textContent = tot > 0 ? cur + " of " + tot + " songs" : (label || "Working…");
 }
-
-function extractLyrics(html) {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  const containers = doc.querySelectorAll('[data-lyrics-container="true"]');
-  if (!containers.length) return null;
-  function walk(node) {
-    let t = "";
-    node.childNodes.forEach(c => {
-      if (c.nodeType === 3) t += c.textContent;
-      else if (c.nodeName === "BR") t += " ";
-      else if (!["SCRIPT","STYLE","HEAD"].includes(c.nodeName)) t += walk(c);
-    });
-    return t;
-  }
-  let full = "";
-  containers.forEach(c => full += " " + walk(c));
-  return full.toLowerCase().replace(/[^a-z0-9\s']/g, " ").replace(/\s+/g, " ").trim();
-}
-
 function countWord(text, word) {
   if (!text || !word) return 0;
   const e = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return (text.match(new RegExp("\\b" + e + "\\b", "g")) || []).length;
 }
 
-function extractAlbumsFromArtistPage(html, artistId) {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  const seen = new Set();
-  const albums = [];
-  // Genius album URLs: genius.com/albums/Artist-name/Album-name
-  doc.querySelectorAll("a[href]").forEach(a => {
-    const href = a.href;
-    if (
-      href &&
-      href.includes("genius.com/albums/") &&
-      !seen.has(href)
-    ) {
-      seen.add(href);
-      // Try to find album name from nearby text or the URL itself
-      const urlName = href.split("/albums/")[1] || "";
-      const parts = urlName.split("/");
-      const albumSlug = parts[1] || parts[0] || "";
-      const name = a.closest("[class*='album']")?.querySelector("[class*='title']")?.textContent.trim()
-        || a.querySelector("[class*='title']")?.textContent.trim()
-        || a.textContent.trim()
-        || albumSlug.replace(/-/g, " ");
-      if (name && albumSlug) {
-        albums.push({ url: href, name, id: albumSlug });
-      }
-    }
-  });
-  return albums;
-}
-
-function extractTracksFromAlbumPage(html) {
-  const doc = new DOMParser().parseFromString(html, "text/html");
-  const seen = new Set();
-  const tracks = [];
-  // Genius song URLs end in -lyrics and are on genius.com
-  doc.querySelectorAll("a[href]").forEach(a => {
-    const href = a.href;
-    if (
-      href &&
-      href.includes("genius.com/") &&
-      href.endsWith("-lyrics") &&
-      !href.includes("/albums/") &&
-      !href.includes("/artists/") &&
-      !seen.has(href)
-    ) {
-      seen.add(href);
-      const title = a.textContent.trim() || href.split("/").pop().replace(/-lyrics$/, "").replace(/-/g, " ");
-      tracks.push({ url: href, title });
-    }
-  });
-  return tracks;
-}
-
 async function handleSearch() {
   const query = document.getElementById("artist-input").value.trim();
   if (!query) { showError("Please enter an artist name."); return; }
-  showError(""); S.shouldStop = false; S.albums = [];
+  showError(""); S.albums = []; S.artistName = query;
   showScreen("loading");
+  document.getElementById("loading-name").textContent = query;
+  document.getElementById("loading-initials").textContent = query[0];
+  document.getElementById("loading-img").style.display = "none";
+  document.getElementById("loading-initials").style.display = "";
 
   try {
-    // 1. Find artist
-    setProgress(0, 0, "Searching for artist…");
-    const sd = await geniusFetch("/search?q=" + encodeURIComponent(query));
-    const hits = (sd.response?.hits || []).filter(h => h.type === "song");
-    if (!hits.length) { showScreen("setup"); showError("Artist not found on Genius."); return; }
-    const artist = hits[0].result.primary_artist;
-    S.artist = artist;
-    document.getElementById("loading-name").textContent = artist.name;
-    document.getElementById("loading-initials").textContent = artist.name[0];
-    if (artist.image_url) {
-      const img = document.getElementById("loading-img");
-      img.src = artist.image_url; img.style.display = "block";
-      document.getElementById("loading-initials").style.display = "none";
-    }
+    setProgress(0, 0, "Fetching tracks from lrclib…");
+    const res = await fetch("https://lrclib.net/api/search?artist_name=" + encodeURIComponent(query));
+    if (!res.ok) throw new Error("lrclib returned HTTP " + res.status);
+    const tracks = await res.json();
 
-    // 2. Scrape artist page to get albums
-    setProgress(0, 0, "Fetching albums…");
-    const artistPageUrl = "https://genius.com/artists/" + encodeURIComponent(artist.name.replace(/\s+/g, "-"));
-    const artistHtml = await fetchPage(artistPageUrl);
-    const scrapedAlbums = extractAlbumsFromArtistPage(artistHtml, artist.id);
-
-    // 3. Filter to studio albums, deduplicate, preserve page order (which is chronological on Genius)
-    const seenAlbumUrls = new Set();
-    const studioAlbums = scrapedAlbums.filter(a => {
-      if (SKIP_ALBUM.test(a.name)) return false;
-      if (seenAlbumUrls.has(a.url)) return false;
-      seenAlbumUrls.add(a.url);
-      return true;
-    });
-
-    if (!studioAlbums.length) {
+    if (!tracks.length) {
       showScreen("setup");
-      showError("No studio albums found for this artist on Genius.");
+      showError("No lyrics found for \"" + query + "\". Try a slightly different spelling.");
       return;
     }
 
-    // 4. Scrape tracklists from each album's Genius page
-    const albumSongLists = [];
-    for (const album of studioAlbums) {
-      if (S.shouldStop) break;
-      setProgress(0, 0, "Loading tracklist: " + album.name);
-      try {
-        const html = await fetchPage(album.url);
-        const tracks = extractTracksFromAlbumPage(html);
-        albumSongLists.push({ album, tracks });
-      } catch {
-        albumSongLists.push({ album, tracks: [] });
-      }
+    // Filter: artist name must match, must have album + lyrics, skip non-studio albums
+    const artistLower = query.toLowerCase();
+    const filtered = tracks.filter(t =>
+      t.artistName?.toLowerCase().includes(artistLower) &&
+      t.albumName &&
+      t.plainLyrics &&
+      !SKIP_ALBUM.test(t.albumName)
+    );
+
+    if (!filtered.length) {
+      showScreen("setup");
+      showError("Tracks found but none had lyrics and album data. Try another artist.");
+      return;
     }
 
-    // 5. Fetch lyrics sequentially with cache and human-paced delays
-    const cache = getCache();
-    const totalSongs = albumSongLists.reduce((s, a) => s + a.tracks.length, 0);
-    let songsDone = 0;
-
-    function humanDelay() {
-      // Random 600–1400ms — enough to not look like a bot
-      return new Promise(r => setTimeout(r, 600 + Math.random() * 800));
+    // Group by album, deduplicate tracks
+    const albumMap = {};
+    for (const track of filtered) {
+      const album = track.albumName.trim();
+      if (!albumMap[album]) albumMap[album] = { name: album, songs: [], seen: new Set() };
+      const key = (track.trackName || "").toLowerCase().trim();
+      if (key && albumMap[album].seen.has(key)) continue;
+      albumMap[album].seen.add(key);
+      const lyrics = track.plainLyrics.toLowerCase().replace(/[^a-z0-9\s']/g, " ").replace(/\s+/g, " ").trim();
+      const wordCount = lyrics.split(/\s+/).filter(Boolean).length;
+      albumMap[album].songs.push({ title: track.trackName, lyrics, wordCount });
     }
 
-    for (const { album, tracks } of albumSongLists) {
-      if (S.shouldStop) break;
-      const albumSongs = [];
-      for (const song of tracks) {
-        if (S.shouldStop) break;
-        songsDone++;
-        setProgress(songsDone, totalSongs, song.title);
-        if (cache[song.url]) {
-          albumSongs.push(cache[song.url]);
-          continue;
-        }
-        try {
-          const html = await fetchPage(song.url);
-          const lyrics = extractLyrics(html);
-          const wc = lyrics ? lyrics.split(/\s+/).filter(Boolean).length : 0;
-          const entry = { title: song.title, lyrics, wordCount: wc };
-          cache[song.url] = entry;
-          setCache(cache);
-          albumSongs.push(entry);
-        } catch { /* skip failed songs */ }
-        await humanDelay();
-      }
-      S.albums.push({
-        name: album.name,
-        year: album.release_date_components?.year || null,
-        songs: albumSongs,
-      });
+    // Keep albums with at least 3 matched tracks, sort alphabetically
+    // (lrclib doesn't return release dates reliably)
+    S.albums = Object.values(albumMap)
+      .filter(a => a.songs.length >= 3)
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    if (!S.albums.length) {
+      showScreen("setup");
+      showError("Couldn't find enough complete albums. The artist name may need to be more specific.");
+      return;
     }
 
     initAnalyze();
@@ -406,14 +284,13 @@ async function handleSearch() {
   }
 }
 
-function stopFetch() { S.shouldStop = true; }
+function stopFetch() { /* no-op — lrclib loads instantly */ }
 
 function initAnalyze() {
-  const validAlbums = S.albums.filter(a => a.songs.length > 0);
-  const totalSongs = validAlbums.reduce((s, a) => s + a.songs.length, 0);
-  const totalWords = validAlbums.reduce((s, a) => s + a.songs.reduce((ss, sg) => ss + sg.wordCount, 0), 0);
-  document.getElementById("hdr-artist").textContent = S.artist?.name || "";
-  document.getElementById("stat-albums").textContent = validAlbums.length;
+  const totalSongs = S.albums.reduce((s, a) => s + a.songs.length, 0);
+  const totalWords = S.albums.reduce((s, a) => s + a.songs.reduce((ss, sg) => ss + sg.wordCount, 0), 0);
+  document.getElementById("hdr-artist").textContent = S.artistName;
+  document.getElementById("stat-albums").textContent = S.albums.length;
   document.getElementById("stat-songs").textContent = totalSongs;
   document.getElementById("stat-words").textContent = totalWords > 999 ? Math.round(totalWords / 1000) + "k" : totalWords;
   S.trackedWords = [];
@@ -425,21 +302,17 @@ function initAnalyze() {
 }
 
 function resetApp() {
-  S.albums = []; S.artist = null; S.trackedWords = [];
+  S.albums = []; S.artistName = ""; S.trackedWords = [];
   if (S.chart) { S.chart.destroy(); S.chart = null; }
   showScreen("setup");
 }
 
 function buildChartData() {
-  const validAlbums = S.albums.filter(a => a.songs.length > 0);
-  if (!validAlbums.length || !S.trackedWords.length) return null;
-  const labels = validAlbums.map(a => {
-    const label = a.year ? a.name + " (" + a.year + ")" : a.name;
-    return label.length > 28 ? label.substring(0, 26) + "…" : label;
-  });
+  if (!S.albums.length || !S.trackedWords.length) return null;
+  const labels = S.albums.map(a => a.name.length > 28 ? a.name.substring(0, 26) + "…" : a.name);
   const datasets = S.trackedWords.map((word, i) => ({
     label: word,
-    data: validAlbums.map(album => {
+    data: S.albums.map(album => {
       const tw = album.songs.reduce((s, sg) => s + sg.wordCount, 0);
       const tc = album.songs.reduce((s, sg) => s + countWord(sg.lyrics, word), 0);
       return tw > 0 ? Math.round((tc / tw) * 1000 * 10) / 10 : 0;
@@ -468,7 +341,7 @@ function updateChart() {
   const isDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
   const gridCol = isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)";
   const tickCol = isDark ? "rgba(200,195,185,0.5)" : "rgba(80,75,65,0.6)";
-  const ttBg = isDark ? "rgba(25,23,20,0.96)" : "rgba(255,255,255,0.97)";
+  const ttBg  = isDark ? "rgba(25,23,20,0.96)" : "rgba(255,255,255,0.97)";
   const ttBorder = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)";
   const ttText = isDark ? "#e8e3da" : "#1a1917";
   if (S.chart) {
@@ -505,12 +378,10 @@ function addWord() {
   inp.value = ""; S.trackedWords.push(w);
   renderChips(); updateChart();
 }
-
 function removeWord(w) {
   S.trackedWords = S.trackedWords.filter(x => x !== w);
   renderChips(); updateChart();
 }
-
 function renderChips() {
   const cl = document.getElementById("chip-list");
   const eh = document.getElementById("empty-hint");
