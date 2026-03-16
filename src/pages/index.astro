@@ -83,6 +83,10 @@ const discographies = {
   .screen.active { display: block; }
 
   #setup-wrap { max-width: 440px; margin: 0 auto; padding: 4rem 1.5rem; }
+  @media (max-width: 640px) {
+    #setup-wrap { padding: 2.5rem 1.25rem; }
+    .app-title { font-size: 2.2rem; }
+  }
   .eyebrow { font-family: var(--font-mono); font-size: 0.58rem; color: var(--color-text-tertiary); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 0.5rem; }
   .app-title { font-family: var(--font-serif); font-size: 3rem; font-weight: 500; line-height: 1.05; margin-bottom: 0.35rem; }
   .field-label { display: block; font-family: var(--font-mono); font-size: 0.6rem; color: var(--color-text-tertiary); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem; }
@@ -92,16 +96,30 @@ const discographies = {
   .prog-track { height: 2px; background: var(--color-border); border-radius: 1px; margin: 0.75rem 0 0.3rem; overflow: hidden; }
   .prog-fill { height: 100%; background: var(--color-text); border-radius: 1px; transition: width 0.3s ease; width: 0%; }
 
-  #screen-analyze { display: flex; flex-direction: column; min-height: 100vh; }
+  #screen-analyze.active { display: flex; flex-direction: column; min-height: 100vh; }
   #analyze-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 0.8rem 1.5rem; border-bottom: 0.5px solid var(--color-border);
     flex-wrap: wrap; gap: 0.6rem;
     background: var(--color-bg); position: sticky; top: 0; z-index: 10;
   }
+  @media (max-width: 640px) {
+    #analyze-header { padding: 0.7rem 1rem; }
+    #analyze-header .stat-group { text-align: left; }
+  }
   #analyze-body { display: flex; flex: 1; min-height: 520px; }
+  @media (max-width: 640px) {
+    #analyze-body { flex-direction: column; min-height: unset; }
+  }
   #word-sidebar { width: 220px; flex-shrink: 0; border-right: 0.5px solid var(--color-border); padding: 1.1rem; display: flex; flex-direction: column; gap: 0.9rem; }
+  @media (max-width: 640px) {
+    #word-sidebar { width: 100%; border-right: none; border-bottom: 0.5px solid var(--color-border); }
+  }
   #chart-main { flex: 1; min-width: 0; padding: 1.25rem 1.5rem; display: flex; flex-direction: column; }
+  @media (max-width: 640px) {
+    #chart-main { padding: 1rem; }
+    #chart-canvas-wrap { height: 280px; }
+  }
 
   .stat-group { text-align: right; }
   .stat-label { font-family: var(--font-mono); font-size: 0.55rem; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: 0.1em; }
@@ -109,12 +127,16 @@ const discographies = {
 
   .word-chip { display: flex; align-items: center; padding: 0.42rem 0.65rem; background: var(--color-surface); border: 0.5px solid var(--color-border); border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 0.78rem; margin-bottom: 0.3rem; }
   .chip-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-right: 0.5rem; }
+  .word-chip { transition: opacity 0.2s; }
+  .word-chip.faded { opacity: 0.25; }
+  .word-chip.active { box-shadow: 0 0 0 1.5px var(--color-border-strong); }
   .chip-remove { background: none; border: none; cursor: pointer; color: var(--color-text-tertiary); font-size: 1rem; line-height: 1; margin-left: auto; padding: 0 0 0 0.4rem; }
   .chip-remove:hover { color: var(--color-text); background: none; }
 
   .chart-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--color-text-tertiary); font-size: 0.88rem; gap: 0.4rem; }
   .unit-note { font-family: var(--font-mono); font-size: 0.58rem; color: var(--color-text-tertiary); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
   .tip-box { padding: 0.7rem; background: var(--color-surface); border-radius: var(--radius-md); font-size: 0.7rem; color: var(--color-text-tertiary); line-height: 1.5; }
+  @media (max-width: 640px) { .tip-wrap { margin-top: 0.5rem; } }
 </style>
 </head>
 <body>
@@ -132,9 +154,9 @@ const discographies = {
       <label class="field-label" for="artist-input">Artist</label>
       <select id="artist-input" style="width:100%;">
         <option value="Kendrick Lamar">Kendrick Lamar</option>
+        <option value="The Beatles">The Beatles</option>
         <option value="Linkin Park">Linkin Park</option>
         <option value="Tame Impala">Tame Impala</option>
-        <option value="The Beatles">The Beatles</option>
       </select>
     </div>
     <button onclick="handleSearch()" style="width:100%;padding:0.85rem;">Begin Analysis →</button>
@@ -191,7 +213,7 @@ const discographies = {
       <div id="empty-hint" style="padding:0.9rem;border:0.5px dashed var(--color-border-strong);border-radius:var(--radius-md);font-size:0.75rem;color:var(--color-text-tertiary);text-align:center;line-height:1.5;">
         Add words above to see how they drift across albums
       </div>
-      <div style="margin-top:auto;">
+      <div style="margin-top:auto;" class="tip-wrap">
         <div class="tip-box">
           <div style="font-family:var(--font-mono);font-size:0.55rem;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.25rem;">Y-axis unit</div>
           Occurrences per 1,000 words — normalizes for album length.
@@ -206,15 +228,16 @@ const discographies = {
       <div id="chart-container" style="display:none;flex-direction:column;flex:1;">
         <div class="unit-note">Word frequency · studio albums in release order · per 1,000 words</div>
         <div id="chart-legend" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:0.75rem;font-size:12px;color:var(--color-text-secondary);"></div>
-        <div style="position:relative;width:100%;height:400px;"><canvas id="lyricsChart"></canvas></div>
+        <div id="chart-canvas-wrap" style="position:relative;width:100%;height:400px;"><canvas id="lyricsChart"></canvas></div>
       </div>
     </div>
   </div>
 </div>
 
 <script is:inline src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script define:vars={{ discographies }}>window.__DISCOGRAPHIES__ = discographies;</script>
 <script is:inline>
-const DISCOGRAPHIES = {"Kendrick Lamar": [{"name": "Section.80", "year": 2011, "tracks": ["Fuck Your Ethnicity", "Hol' Up", "A.D.H.D", "No Joke", "Chapter Six", "Rigamortis", "Institutionalized", "Chapter Ten", "Ronald Reagan Era", "Poe Man's Dreams", "Blow My High", "Alien Girl", "No Makeup", "Keisha's Song", "HiiiPoWeR"]}, {"name": "good kid, m.A.A.d city", "year": 2012, "tracks": ["Sherane a.k.a Master Splinter's Daughter", "Bitch, Don't Kill My Vibe", "Backseat Freestyle", "The Art of Peer Pressure", "Money Trees", "Poetic Justice", "Good Kid", "m.A.A.d city", "Swimming Pools (Drank)", "Sing About Me, I'm Dying of Thirst", "Real", "Compton"]}, {"name": "To Pimp a Butterfly", "year": 2015, "tracks": ["Wesley's Theory", "For Free?", "King Kunta", "Institutionalized", "These Walls", "u", "Alright", "For Sale?", "Momma", "Hood Politics", "How Much a Dollar Cost", "Complexion", "The Blacker the Berry", "You Ain't Gotta Lie", "i", "Mortal Man"]}, {"name": "untitled unmastered.", "year": 2016, "tracks": ["untitled 01", "untitled 02", "untitled 03", "untitled 04", "untitled 05", "untitled 06", "untitled 07", "untitled 08"]}, {"name": "DAMN.", "year": 2017, "tracks": ["BLOOD.", "DNA.", "YAH.", "ELEMENT.", "FEEL.", "LOYALTY.", "PRIDE.", "HUMBLE.", "LUST.", "LOVE.", "XXX.", "FEAR.", "GOD.", "DUCKWORTH."]}, {"name": "Mr. Morale & The Big Steppers", "year": 2022, "tracks": ["United in Grief", "N95", "Worldwide Steppers", "Die Hard", "Father Time", "Rich (Interlude)", "Rich Spirit", "We Cry Together", "Purple Hearts", "Count Me Out", "Crown", "Silent Hill", "Savior (Interlude)", "Savior", "Auntie Diaries", "Mr. Morale", "Mother I Sober", "Mirror"]}, {"name": "GNX", "year": 2024, "tracks": ["wacced out murals", "squabble up", "luther", "man at the garden", "hey now", "reincarnated", "tv off", "dodger blue", "peekaboo", "heart pt. 6", "gloria", "gnx"]}], "The Beatles": [{"name": "Please Please Me", "year": 1963, "tracks": ["I Saw Her Standing There", "Misery", "Anna (Go to Him)", "Chains", "Boys", "Ask Me Why", "Please Please Me", "Love Me Do", "P.S. I Love You", "Baby It's You", "Do You Want to Know a Secret", "A Taste of Honey", "There's a Place", "Twist and Shout"]}, {"name": "With the Beatles", "year": 1963, "tracks": ["It Won't Be Long", "All I've Got to Do", "All My Loving", "Don't Bother Me", "Little Child", "Till There Was You", "Please Mister Postman", "Roll Over Beethoven", "Hold Me Tight", "You Really Got a Hold on Me", "I Wanna Be Your Man", "Devil in Her Heart", "Not a Second Time", "Money (That's What I Want)"]}, {"name": "A Hard Day's Night", "year": 1964, "tracks": ["A Hard Day's Night", "I Should Have Known Better", "If I Fell", "I'm Happy Just to Dance with You", "And I Love Her", "Tell Me Why", "Can't Buy Me Love", "Any Time at All", "I'll Cry Instead", "Things We Said Today", "When I Get Home", "You Can't Do That", "I'll Be Back"]}, {"name": "Beatles for Sale", "year": 1964, "tracks": ["No Reply", "I'm a Loser", "Baby's in Black", "Rock and Roll Music", "I'll Follow the Sun", "Mr. Moonlight", "Kansas City", "Eight Days a Week", "Words of Love", "Honey Don't", "Every Little Thing", "I Don't Want to Spoil the Party", "What You're Doing", "Everybody's Trying to Be My Baby"]}, {"name": "Help!", "year": 1965, "tracks": ["Help!", "The Night Before", "You've Got to Hide Your Love Away", "I Need You", "Another Girl", "You're Going to Lose That Girl", "Ticket to Ride", "Act Naturally", "It's Only Love", "You Like Me Too Much", "Tell Me What You See", "I've Just Seen a Face", "Yesterday", "Dizzy Miss Lizzy"]}, {"name": "Rubber Soul", "year": 1965, "tracks": ["Drive My Car", "Norwegian Wood (This Bird Has Flown)", "You Won't See Me", "Nowhere Man", "Think for Yourself", "The Word", "Michelle", "What Goes On", "Girl", "I'm Looking Through You", "In My Life", "Wait", "If I Needed Someone", "Run for Your Life"]}, {"name": "Revolver", "year": 1966, "tracks": ["Taxman", "Eleanor Rigby", "I'm Only Sleeping", "Love You To", "Here, There and Everywhere", "Yellow Submarine", "She Said She Said", "Good Day Sunshine", "And Your Bird Can Sing", "For No One", "Doctor Robert", "I Want to Tell You", "Got to Get You into My Life", "Tomorrow Never Knows"]}, {"name": "Sgt. Pepper's Lonely Hearts Club Band", "year": 1967, "tracks": ["Sgt. Pepper's Lonely Hearts Club Band", "With a Little Help from My Friends", "Lucy in the Sky with Diamonds", "Getting Better", "Fixing a Hole", "She's Leaving Home", "Being for the Benefit of Mr. Kite!", "Within You Without You", "When I'm Sixty-Four", "Lovely Rita", "Good Morning Good Morning", "Sgt. Pepper's Lonely Hearts Club Band (Reprise)", "A Day in the Life"]}, {"name": "Magical Mystery Tour", "year": 1967, "tracks": ["Magical Mystery Tour", "The Fool on the Hill", "Flying", "Blue Jay Way", "Your Mother Should Know", "I Am the Walrus", "Hello, Goodbye", "Strawberry Fields Forever", "Penny Lane", "Baby, You're a Rich Man", "All You Need Is Love"]}, {"name": "The Beatles (White Album)", "year": 1968, "tracks": ["Back in the U.S.S.R.", "Dear Prudence", "Glass Onion", "Ob-La-Di, Ob-La-Da", "Wild Honey Pie", "The Continuing Story of Bungalow Bill", "While My Guitar Gently Weeps", "Happiness Is a Warm Gun", "Martha My Dear", "I'm So Tired", "Blackbird", "Piggies", "Rocky Raccoon", "Don't Pass Me By", "Why Don't We Do It in the Road?", "I Will", "Julia", "Birthday", "Yer Blues", "Mother Nature's Son", "Everybody's Got Something to Hide Except Me and My Monkey", "Sexy Sadie", "Helter Skelter", "Long, Long, Long", "Revolution 1", "Honey Pie", "Savoy Truffle", "Cry Baby Cry", "Revolution 9", "Good Night"]}, {"name": "Yellow Submarine", "year": 1969, "tracks": ["Yellow Submarine", "Only a Northern Song", "All Together Now", "Hey Bulldog", "It's All Too Much", "All You Need Is Love"]}, {"name": "Abbey Road", "year": 1969, "tracks": ["Come Together", "Something", "Maxwell's Silver Hammer", "Oh! Darling", "Octopus's Garden", "I Want You (She's So Heavy)", "Here Comes the Sun", "Because", "You Never Give Me Your Money", "Sun King", "Mean Mr. Mustard", "Polythene Pam", "She Came In Through the Bathroom Window", "Golden Slumbers", "Carry That Weight", "The End", "Her Majesty"]}, {"name": "Let It Be", "year": 1970, "tracks": ["Two of Us", "Dig a Pony", "Across the Universe", "I Me Mine", "Dig It", "Let It Be", "Maggie Mae", "I've Got a Feeling", "One After 909", "The Long and Winding Road", "For You Blue", "Get Back"]}], "Linkin Park": [{"name": "Hybrid Theory", "year": 2000, "tracks": ["Papercut", "One Step Closer", "With You", "Points of Authority", "Crawling", "Runaway", "By Myself", "In the End", "A Place for My Head", "Forgotten", "Cure for the Itch", "Pushing Me Away"]}, {"name": "Meteora", "year": 2003, "tracks": ["Foreword", "Don't Stay", "Somewhere I Belong", "Lying from You", "Hit the Floor", "Easier to Run", "Faint", "Figure.09", "Breaking the Habit", "From the Inside", "Nobody's Listening", "Session", "Numb"]}, {"name": "Minutes to Midnight", "year": 2007, "tracks": ["Wake", "Given Up", "Leave Out All the Rest", "Bleed It Out", "Shadow of the Day", "What I've Done", "Hands Held High", "No More Sorrow", "Valentine's Day", "In Between", "In Pieces", "The Little Things Give You Away"]}, {"name": "A Thousand Suns", "year": 2010, "tracks": ["The Requiem", "The Radiance", "Burning in the Skies", "Empty Spaces", "When They Come for Me", "Robot Boy", "Jornada del Muerto", "Waiting for the End", "Blackout", "Wretches and Kings", "Wisdom, Justice, and Love", "Iridescent", "Fallout", "The Catalyst", "The Messenger"]}, {"name": "Living Things", "year": 2012, "tracks": ["Lost in the Echo", "In My Remains", "Burn It Down", "Lies Greed Misery", "I'll Be Gone", "Castle of Glass", "Victimized", "Roads Untraveled", "Tinfoil", "Powerless"]}, {"name": "The Hunting Party", "year": 2014, "tracks": ["Keys to the Kingdom", "All for Nothing", "Guilty All the Same", "The Summoning", "War", "Wastelands", "Until It's Gone", "Rebellion", "Mark the Graves", "Drawbar", "Final Masquerade", "A Line in the Sand"]}, {"name": "One More Light", "year": 2017, "tracks": ["Nobody Can Save Me", "Good Goodbye", "Talking to Myself", "Battle Symphony", "Invisible", "Heavy", "Sorry for Now", "Halfway Right", "One More Light", "Sharp Edges"]}, {"name": "From Zero", "year": 2024, "tracks": ["From Zero (Intro)", "The Emptiness Machine", "Cut the Bridge", "Heavy Is the Crown", "Over Each Other", "Casualty", "Overflow", "Two Faced", "Stained", "Good Things Go", "IGYEIH", "Against It All", "Lifeline"]}], "Tame Impala": [{"name": "Innerspeaker", "year": 2010, "tracks": ["It Is Not Meant to Be", "Desire Be Desire Go", "Alter Ego", "Lucidity", "Why Won't You Make Up Your Mind?", "Solitude Is Bliss", "Jeremy's Storm", "Expectation", "The Bold Arrow of Time", "Runway, Houses, City, Clouds", "I Don't Really Mind"]}, {"name": "Lonerism", "year": 2012, "tracks": ["Be Above It", "Endors Toi", "Apocalypse Dreams", "Mind Mischief", "Music to Walk Home By", "Why Won't They Talk to Me?", "Feels Like We Only Go Backwards", "Keep on Lying", "Elephant", "She Just Won't Believe Me", "Nothing That Has Happened So Far Has Been Anything We Could Control", "Sun's Coming Up"]}, {"name": "Currents", "year": 2015, "tracks": ["Let It Happen", "Nangs", "The Moment", "Yes I'm Changing", "Eventually", "Gossip", "The Less I Know the Better", "Past Life", "Disciples", "Cause I'm a Man", "Reality in Motion", "Love/Paranoia", "'Cause I'm a Man", "New Person, Same Old Mistakes"]}, {"name": "The Slow Rush", "year": 2020, "tracks": ["One More Year", "Instant Destiny", "Borderline", "Tomorrow's Dust", "On Track", "Lost in Yesterday", "Is It True", "It Might Be Time", "Glimmer", "One More Hour"]}, {"name": "Deadbeat", "year": 2025, "tracks": ["My Old Ways", "No Reply", "Dracula", "Loser", "Oblivion", "Not My World", "Piece Of Heaven", "Obsolete", "Ethereal Connection", "See You On Monday (You're Lost)", "Afterthought", "End Of Summer"]}]};
+const DISCOGRAPHIES = window.__DISCOGRAPHIES__;
 const COLORS = ["#7F77DD","#1D9E75","#D85A30","#D4537E","#378ADD","#BA7517","#E24B4A","#639922"];
 const SKIP_ALBUM = /\b(live|concert|tour|session|unplugged|acoustic|festival|mixtape|compilation|greatest hits|best of|collection|anthology|remix|remixes|\bep\b|single|instrumental|karaoke|tribute|cover|deluxe)\b/i;
 const S = { artistName: "", albums: [], trackedWords: [], chart: null, shouldStop: false };
@@ -342,7 +365,7 @@ function getTopWords(n) {
     "hadn't","hasn't","i've","i'll","i'd","you're","you've","you'll","you'd",
     "he's","she's","they're","they've","we're","we've","we'll","let's","who's",
     "nigga", "fuck", "shit", "niggas", "bitch", "shiz", "his", "her", "hol'", "gon'",
-    "baby", "talkin'", "look"
+    "baby", "talkin'", "look", "why", "really"
   ]);
 
   const freq = {};
@@ -392,6 +415,36 @@ function buildChartData() {
   return { labels, datasets };
 }
 
+function highlightLine(activeIdx) {
+  if (!S.chart) return;
+  S.chart.data.datasets.forEach((ds, i) => {
+    ds.borderColor = COLORS[i % COLORS.length] + (i === activeIdx ? "" : "44");
+    ds.pointBackgroundColor = COLORS[i % COLORS.length] + (i === activeIdx ? "" : "44");
+    ds.borderWidth = i === activeIdx ? 3 : 1.5;
+    ds.pointRadius = i === activeIdx ? 7 : 4;
+  });
+  S.chart.update("none");
+  // Highlight chip
+  document.querySelectorAll(".word-chip").forEach((el, i) => {
+    el.classList.toggle("faded", i !== activeIdx);
+    el.classList.toggle("active", i === activeIdx);
+  });
+}
+
+function clearHighlight() {
+  if (!S.chart) return;
+  S.chart.data.datasets.forEach((ds, i) => {
+    ds.borderColor = COLORS[i % COLORS.length];
+    ds.pointBackgroundColor = COLORS[i % COLORS.length];
+    ds.borderWidth = 2;
+    ds.pointRadius = 6;
+  });
+  S.chart.update("none");
+  document.querySelectorAll(".word-chip").forEach(el => {
+    el.classList.remove("faded", "active");
+  });
+}
+
 function updateChart() {
   const data = buildChartData();
   if (!data) {
@@ -420,6 +473,10 @@ function updateChart() {
       type: "line", data,
       options: {
         responsive: true, maintainAspectRatio: false,
+        onHover: (event, elements) => {
+          if (elements.length) highlightLine(elements[0].datasetIndex);
+          else clearHighlight();
+        },
         plugins: {
           legend: { display: false },
           tooltip: {
